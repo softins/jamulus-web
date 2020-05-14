@@ -36,7 +36,7 @@
 			<tbody>
 				<template v-for="(s, index) in servers">
 				<tr :key="'a'+index" :class="{nat: s.NAT, perm: s.perm, even: !(index % 2), odd: index % 2}">
-					<td class="num right">{{ index }}</td>
+					<td class="num right">{{ s.index }}</td>
 					<td class="name left">{{ s.name }}</td>
 					<td class="city left">{{ s.city }}</td>
 					<td class="country left">{{ s.country }}</td>
@@ -105,7 +105,9 @@ export default {
 			errored: false,
 			loading: false,
 			fetched: null,
-			timer: null
+			timer: null,
+			uparrow: "\u25b2",
+			dnarrow: "\u25bc"
 		}
 	},
 	computed: {
