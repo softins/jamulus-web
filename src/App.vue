@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<h1>Jamulus servers</h1>
+		<h1>Jamulus Explorer</h1>
 		<p class="options">
 			<select v-model="centralServer" @change="setServer">
 				<option value="" selected>Select default server</option>
@@ -9,7 +9,7 @@
 				<option value="worldjam.vip:22124">Worldjam server</option>
 			</select>
 
-			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label>
+			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label> (every 10-15 sec)
 		</p>
 			<div v-if="loading">Loading...</div>
 			<div v-if="errored">Error fetching from {{centralServer}}</div>
