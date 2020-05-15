@@ -3,7 +3,7 @@
 		<h1>Jamulus Explorer</h1>
 		<p class="options">
 			<select v-model="centralServer" @change="setServer">
-				<option value="" selected>Select default server</option>
+				<option value="" selected>Select server...</option>
 				<option value="jamulus.fischvolk.de:22124">Default server</option>
 				<option value="jamulus.fischvolk.de:22224">Default server (North America)</option>
 				<option value="worldjam.vip:22124">Worldjam server</option>
@@ -95,6 +95,7 @@
 				</template>
 			</tbody>
 		</table>
+    <div class="copyright">&copy; 2020 Tony Mountifield</div>
 	</div>
 </template>
 
@@ -233,7 +234,7 @@ export default {
 	font-size: 80%;
 	text-align: center;
 	color: #2c3e50;
-	margin-top: 60px;
+	margin-top: 10px;
 }
 
 .click {
@@ -306,5 +307,12 @@ ul {
 }
 label {
 	margin-left: 3em;
+}
+.copyright {
+  border-top: 1px lightgrey solid;
+  margin-top: 3em;
+  padding-top: 1em;
+  font-size: 80%;
+  color: grey;
 }
 </style>
