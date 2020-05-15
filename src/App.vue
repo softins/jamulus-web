@@ -1,12 +1,16 @@
 <template>
 	<div id="app">
 		<h1>Jamulus servers</h1>
-		<p class="options"><select v-model="centralServer" @change="setServer">
+		<p class="options">
+			<select v-model="centralServer" @change="setServer">
 				<option value="" selected>Select default server</option>
 				<option value="jamulus.fischvolk.de:22124">Default server</option>
 				<option value="jamulus.fischvolk.de:22224">Default server (North America)</option>
 				<option value="worldjam.vip:22124">Worldjam server</option>
-			</select></p>
+			</select>
+
+			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label>
+		</p>
 			<div v-if="loading">Loading...</div>
 			<div v-if="errored">Error fetching from {{centralServer}}</div>
 			<div v-if="centralServer && !loading && (!servers || !servers.length)">No data from {{centralServer}}</div>
@@ -16,38 +20,39 @@
 					<td colspan=8 class="left"><ul>
 							<li>If NAT is shown, it is likely to be a server on someone's personal LAN</li>
 							<li>The ping time shown is from this site's server at Linode in London.</li>
+							<li>Click on a column heading to sort by that column.</li>
 						</ul>
 					</td>
-					<td colspan=2>Last updated:<br>{{ lastFetch }}</td>
+					<td colspan=2>{{ servers.length }} servers.<br>Last updated:<br>{{ lastFetch }}</td>
 				</tr>
 				<tr>
-					<th class="num right">#</th>
-					<th class="name left">Name</th>
-					<th class="city left">City</th>
-					<th class="country left">Country</th>
-					<th class="ping right">Ping (ms)</th>
-					<th class="ip left">IP</th>
-					<th class="port right">Port</th>
-					<th class="nat left">NAT</th>
-					<th class="version left">Version</th>
-					<th class="os left">OS</th>
+					<th class="click num right" @click="sortBy('index')"># {{ sortby=='index' ? arrow : '' }}</th>
+					<th class="click name left" @click="sortBy('name')">Name {{ sortby=='name' ? arrow : '' }}</th>
+					<th class="click city left" @click="sortBy('city')">City {{ sortby=='city' ? arrow : '' }}</th>
+					<th class="click country left" @click="sortBy('country')">Country {{ sortby=='country' ? arrow : '' }}</th>
+					<th class="click ping right" @click="sortBy('ping')">Ping (ms) {{ sortby=='ping' ? arrow : '' }}</th>
+					<th class="click ip left" @click="sortBy('numip')">IP {{ sortby=='numip' ? arrow : '' }}</th>
+					<th class="click port right" @click="sortBy('port')">Port {{ sortby=='port' ? arrow : '' }}</th>
+					<th class="click nat left" @click="sortBy('NAT')">NAT {{ sortby=='NAT' ? arrow : '' }}</th>
+					<th class="click version left" @click="sortBy('version')">Version {{ sortby=='version' ? arrow : '' }}</th>
+					<th class="click os left" @click="sortBy('os')">OS {{ sortby=='os' ? arrow : '' }}</th>
 				</tr>
 			</thead>
 			<tbody>
-				<template v-for="(s, index) in servers">
-				<tr :key="'a'+index" :class="{nat: s.NAT, perm: s.perm, even: !(index % 2), odd: index % 2}">
+				<template v-for="(s, index) in sortedServers">
+				<tr :key="'a'+s.index" :class="{nat: s.NAT, perm: s.perm, even: !(index % 2), odd: index % 2}">
 					<td class="num right">{{ s.index }}</td>
 					<td class="name left">{{ s.name }}</td>
 					<td class="city left">{{ s.city }}</td>
 					<td class="country left">{{ s.country }}</td>
-					<td class="ping right">{{ s.ping }}</td>
+					<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
 					<td class="ip left">{{ s.ip }}</td>
 					<td class="port right">{{ s.port }}</td>
 					<td class="nat left"><span v-if="s.NAT">NAT</span></td>
 					<td class="version left">{{ s.version }}</td>
 					<td class="os left">{{ s.os }}</td>
 				</tr>
-				<tr :key="'b'+index" v-if="s.clients && s.clients.length" :class="{even: !(index % 2), odd: index % 2}">
+				<tr :key="'b'+s.index" v-if="s.clients && s.clients.length" :class="{even: !(index % 2), odd: index % 2}">
 					<td colspan=10 class="clientlist">
 						<table class="clients">
 							<thead>
@@ -75,7 +80,7 @@
 						</table>
 					</td>
 				</tr>
-				<tr :key="'c'+index" v-if="s.clients && s.clients.length">
+				<tr :key="'c'+s.index" v-if="s.clients && s.clients.length">
 					<th class="num right">#</th>
 					<th class="name left">Name</th>
 					<th class="city left">City</th>
@@ -107,15 +112,68 @@ export default {
 			fetched: null,
 			timer: null,
 			uparrow: "\u25b2",
-			dnarrow: "\u25bc"
+			dnarrow: "\u25bc",
+			sortup: 1,
+			sortby: null,
+			refresh: false
 		}
 	},
 	computed: {
+		arrow() {
+			return this.sortup>0 ? this.uparrow : this.dnarrow;
+		},
 		lastFetch() {
 			return this.fetched && this.fetched.toLocaleTimeString();
+		},
+		sortedServers() {
+			var sortup = this.sortup;
+			var sortby = this.sortby;
+			if (!this.sortby) return this.servers;
+			function compare(a,b) {
+				switch (sortby) {
+					case 'name':
+						if (a.name.toLowerCase()<b.name.toLowerCase()) return -sortup;
+						if (a.name.toLowerCase()>b.name.toLowerCase()) return sortup;
+						break;
+					case 'country':
+						if (a.country.toLowerCase()<b.country.toLowerCase()) return -sortup;
+						if (a.country.toLowerCase()>b.country.toLowerCase()) return sortup;
+						// fall through
+					case 'city':
+						if (a.city.toLowerCase()<b.city.toLowerCase()) return -sortup;
+						if (a.city.toLowerCase()>b.city.toLowerCase()) return sortup;
+						break;
+					case 'index':
+						break;
+					default:
+						if (a[sortby]<b[sortby]) return -sortup;
+						if (a[sortby]>b[sortby]) return sortup;
+						break;
+				}
+				return sortup * (a.index - b.index);
+			}
+			return this.servers.slice().sort(compare);
 		}
 	},
 	methods: {
+		newRefresh() {
+			if (this.refresh) {
+				if (!this.timer) {
+					this.timer = setTimeout(this.refreshServer, 1);
+				}
+			} else if (this.timer) {
+				clearTimeout(this.timer);
+				this.timer = null;
+			}
+		},
+		sortBy(key) {
+			if (key === this.sortby) {
+				this.sortup = -this.sortup;
+				return;
+			}
+			this.sortup = 1;
+			this.sortby = key;
+		},
 		setServer() {
 			if (this.timer) {
 				clearTimeout(this.timer);
@@ -134,7 +192,7 @@ export default {
 						this.servers = response.data
 						//var self = this;
 						//this.timer = setTimeout(self.refreshServer, 10000);
-						this.timer = setTimeout(this.refreshServer, 10000);
+						if (this.refresh) this.timer = setTimeout(this.refreshServer, 10000);
 					})
 					.catch(error => {
 						console.log(error)
@@ -154,7 +212,7 @@ export default {
 						this.servers = response.data
 						//var self = this;
 						//this.timer = setTimeout(self.refreshServer, 10000);
-						this.timer = setTimeout(this.refreshServer, 10000);
+						if (this.refresh) this.timer = setTimeout(this.refreshServer, 10000);
 					})
 					.catch(error => {
 						console.log(error)
@@ -178,6 +236,9 @@ export default {
 	margin-top: 60px;
 }
 
+.click {
+	cursor: pointer;
+}
 .left {
 	text-align: left;
 }
@@ -242,5 +303,8 @@ export default {
 
 ul {
 	margin:0;
+}
+label {
+	margin-left: 3em;
 }
 </style>
