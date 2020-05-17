@@ -182,10 +182,10 @@ export default {
 			}
 			console.log('setServer: centralServer changed to ' + this.centralServer);
 			this.servers = [];
+			this.errored = false;
 			if (this.centralServer != '') {
 				//this.servers = servers;
 				this.loading = true
-				this.errored = false
 				this.$http
 					.get('http://jamulus.softins.co.uk/servers.php?central=' + this.centralServer)
 					.then(response => {
