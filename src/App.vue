@@ -48,7 +48,7 @@
 					<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
 					<td class="ip left">{{ s.ip }}</td>
 					<td class="port right">{{ s.port }}</td>
-					<td class="nat left"><span v-if="s.NAT">NAT</span></td>
+					<td class="nat left"><span v-if="s.NAT">NAT</span><span v-if="s.NAT2"> ({{s.NAT2}})</span></td>
 					<td class="version left">{{ s.version }}</td>
 					<td class="os left">{{ s.os }}</td>
 				</tr>
