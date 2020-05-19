@@ -6,6 +6,8 @@
 				<option value="" selected>Select server...</option>
 				<option value="jamulus.fischvolk.de:22124">Default server</option>
 				<option value="jamulus.fischvolk.de:22224">Default server (North America)</option>
+				<option value="centralrock.drealm.info:22124">Central Rock</option>
+				<option value="centraljazz.drealm.info:22224">Central Jazz</option>
 				<option value="worldjam.vip:22124">Worldjam server</option>
 			</select>
 
