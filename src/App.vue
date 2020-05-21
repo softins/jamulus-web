@@ -19,8 +19,8 @@
 		<table v-if="servers && servers.length" class="servers">
 			<thead>
 				<tr>
-					<td colspan=8 class="left"><ul>
-							<li>If NAT is shown, it is likely to be a server on someone's personal LAN</li>
+					<td colspan=7 class="left"><ul>
+							<li>Central server address: <strong>{{ centralServer }}</strong></li>
 							<li>The ping time shown is from this site's server at Linode in London.</li>
 							<li>Click on a column heading to sort by that column.</li>
 						</ul>
@@ -35,14 +35,13 @@
 					<th class="click ping right" @click="sortBy('ping')">Ping (ms) {{ sortby=='ping' ? arrow : '' }}</th>
 					<th class="click ip left" @click="sortBy('numip')">IP {{ sortby=='numip' ? arrow : '' }}</th>
 					<th class="click port right" @click="sortBy('port')">Port {{ sortby=='port' ? arrow : '' }}</th>
-					<th class="click nat left" @click="sortBy('NAT')">NAT {{ sortby=='NAT' ? arrow : '' }}</th>
 					<th class="click version left" @click="sortBy('version')">Version {{ sortby=='version' ? arrow : '' }}</th>
 					<th class="click os left" @click="sortBy('os')">OS {{ sortby=='os' ? arrow : '' }}</th>
 				</tr>
 			</thead>
 			<tbody>
 				<template v-for="(s, index) in sortedServers">
-				<tr :key="'a'+s.index" :class="{nat: s.NAT, perm: s.perm, even: !(index % 2), odd: index % 2}">
+				<tr :key="'a'+s.index" :class="{perm: s.perm, even: !(index % 2), odd: index % 2}">
 					<td class="num right">{{ s.index }}</td>
 					<td class="name left">{{ s.name }}</td>
 					<td class="city left">{{ s.city }}</td>
@@ -50,12 +49,11 @@
 					<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
 					<td class="ip left">{{ s.ip }}</td>
 					<td class="port right">{{ s.port }}</td>
-					<td class="nat left"><span v-if="s.NAT">NAT</span><span v-if="s.NAT2"> ({{s.NAT2}})</span></td>
 					<td class="version left">{{ s.version }}</td>
 					<td class="os left">{{ s.os }}</td>
 				</tr>
 				<tr :key="'b'+s.index" v-if="s.clients && s.clients.length" :class="{even: !(index % 2), odd: index % 2}">
-					<td colspan=10 class="clientlist">
+					<td colspan=9 class="clientlist">
 						<table class="clients">
 							<thead>
 								<tr>
@@ -90,7 +88,6 @@
 					<th class="ping right">Ping (ms)</th>
 					<th class="ip left">IP</th>
 					<th class="port right">Port</th>
-					<th class="nat left">NAT</th>
 					<th class="version left">Version</th>
 					<th class="os left">OS</th>
 				</tr>
