@@ -48,7 +48,7 @@
 					<td class="country left">{{ s.country }}</td>
 					<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
 					<td class="ip left">{{ s.ip }}</td>
-					<td class="port right">{{ s.port }}</td>
+					<td class="port right">{{ s.port2 ? '('+s.port2+') '+s.port : s.port }}</td>
 					<td class="version left">{{ s.version }}</td>
 					<td class="os left">{{ s.os }}</td>
 				</tr>
