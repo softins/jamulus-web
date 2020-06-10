@@ -64,7 +64,6 @@
 								<th class="skill left">Skill</th>
 								<th class="city left">City</th>
 								<th class="country left">Country</th>
-								<th class="ip left">IP</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -75,7 +74,6 @@
 								<td class="skill left">{{ c.skill }}</td>
 								<td class="city left">{{ c.city }}</td>
 								<td class="country left">{{ c.country }}</td>
-								<td class="ip left">{{ c.ip }}</td>
 								</tr>
 							</tbody>
 						</table>
