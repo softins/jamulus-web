@@ -26,7 +26,7 @@
 							<li>Click on a column heading to sort by that column.</li>
 						</ul>
 					</td>
-					<td colspan=2>{{ servers.length }} servers.<br>Last updated:<br>{{ lastFetch }}</td>
+					<td colspan=2>{{ servers.length }} {{ servertxt }}.<br>Last updated:<br>{{ lastFetch }}</td>
 				</tr>
 				<tr>
 					<th class="click num right" @click="sortBy('index')"># {{ sortby=='index' ? arrow : '' }}</th>
@@ -118,6 +118,9 @@ export default {
 		}
 	},
 	computed: {
+		servertxt() {
+			return this.servers.length == 1 ? 'server' : 'servers';
+		},
 		arrow() {
 			return this.sortup>0 ? this.uparrow : this.dnarrow;
 		},
