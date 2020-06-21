@@ -133,6 +133,8 @@ export default {
 			if (!this.sortby) return this.servers;
 			function compare(a,b) {
 				switch (sortby) {
+					case 'index':
+						break;
 					case 'name':
 						if (a.name.toLowerCase()<b.name.toLowerCase()) return -sortup;
 						if (a.name.toLowerCase()>b.name.toLowerCase()) return sortup;
@@ -145,9 +147,15 @@ export default {
 						if (a.city.toLowerCase()<b.city.toLowerCase()) return -sortup;
 						if (a.city.toLowerCase()>b.city.toLowerCase()) return sortup;
 						break;
-					case 'index':
+					case 'ping':
+						if (a[sortby]<0 && b[sortby]>=0) return 1;
+						if (a[sortby]>=0 && b[sortby]<0) return -1;
+						if (a[sortby]<b[sortby]) return -sortup;
+						if (a[sortby]>b[sortby]) return sortup;
 						break;
 					default:
+						if (a[sortby]=='' && b[sortby]!='') return 1;
+						if (a[sortby]!='' && b[sortby]=='') return -1;
 						if (a[sortby]<b[sortby]) return -sortup;
 						if (a[sortby]>b[sortby]) return sortup;
 						break;
