@@ -106,6 +106,7 @@ export default {
 		return {
 			servers: [],
 			centralServer: '',
+			queriedServer: '',
 			errored: false,
 			loading: false,
 			fetched: null,
@@ -194,10 +195,12 @@ export default {
 			this.errored = false;
 			if (this.centralServer != '') {
 				//this.servers = servers;
+				this.queriedServer = this.centralServer
 				this.loading = true
 				this.$http
 					.get('http://jamulus.softins.co.uk/servers.php?central=' + this.centralServer)
 					.then(response => {
+						if (this.queriedServer != this.centralServer) return;
 						this.fetched = new Date()
 						this.servers = response.data
 						//var self = this;
@@ -213,11 +216,13 @@ export default {
 		},
 		refreshServer() {
 			this.timer = null;
+			this.errored = false;
 			if (this.centralServer != '') {
-				this.errored = false
+				this.queriedServer = this.centralServer
 				this.$http
 					.get('http://jamulus.softins.co.uk/servers.php?central=' + this.centralServer)
 					.then(response => {
+						if (this.queriedServer != this.centralServer) return;
 						this.fetched = new Date()
 						this.servers = response.data
 						//var self = this;
