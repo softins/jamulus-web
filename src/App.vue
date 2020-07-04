@@ -13,6 +13,7 @@
 			</select>
 
 			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label> (every 10-15 sec)
+			<label>Hide empty servers:<input type="checkbox" value="1" v-model="hideempty"></label>
 		</p>
 			<div v-if="loading">Loading...</div>
 			<div v-if="errored">Error fetching from {{centralServer}}</div>
@@ -115,7 +116,8 @@ export default {
 			dnarrow: "\u25bc",
 			sortup: 1,
 			sortby: null,
-			refresh: false
+			refresh: false,
+			hideempty: false
 		}
 	},
 	computed: {
@@ -131,7 +133,7 @@ export default {
 		sortedServers() {
 			var sortup = this.sortup;
 			var sortby = this.sortby;
-			if (!this.sortby) return this.servers;
+			if (!this.sortby && !this.hideempty) return this.servers;
 			function compare(a,b) {
 				switch (sortby) {
 					case 'index':
@@ -163,6 +165,9 @@ export default {
 				}
 				return sortup * (a.index - b.index);
 			}
+			if (this.hideempty)
+				return this.servers.filter(function(s) {return s.clients && s.clients.length;}).sort(compare);
+
 			return this.servers.slice().sort(compare);
 		}
 	},
