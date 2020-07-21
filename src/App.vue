@@ -94,7 +94,7 @@
 				</template>
 			</tbody>
 		</table>
-    <div class="copyright">&copy; 2020 Tony Mountifield</div>
+		<div class="copyright">&copy; 2020 <a href="https://tony.mountifield.org">Tony Mountifield</a> :: Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a></div>
 	</div>
 </template>
 
@@ -333,5 +333,13 @@ label {
   padding-top: 1em;
   font-size: 80%;
   color: grey;
+}
+
+.copyright a {
+	text-decoration: none;
+}
+
+.copyright a:hover {
+	text-decoration: underline;
 }
 </style>
