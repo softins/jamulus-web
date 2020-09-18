@@ -1,7 +1,7 @@
 <template>
 	<div id="app">
 		<h1>Jamulus Explorer</h1>
-		<p class="options">
+		<p class="options" v-if="!fixedServer">
 			<select v-model="centralServer" @change="setServer">
 				<option value="" selected>Select server...</option>
 				<option value="jamulus.fischvolk.de:22124">Default server</option>
@@ -108,6 +108,7 @@ export default {
 			servers: [],
 			centralServer: '',
 			queriedServer: '',
+			fixedServer: false,
 			errored: false,
 			loading: false,
 			fetched: null,
@@ -118,6 +119,26 @@ export default {
 			sortby: null,
 			refresh: false,
 			hideempty: false
+		}
+	},
+	created() {
+		var urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.has('auto')) {
+			this.refresh = true;
+		}
+		if (urlParams.has('hideempty')) {
+			this.hideempty = true;
+		}
+		if (urlParams.has('central')) {
+			this.centralServer = urlParams.get('central');
+			if (this.centralServer) {
+				this.fixedServer = true;
+			}
+		}
+	},
+	mounted() {
+		if (this.fixedServer) {
+			this.setServer();
 		}
 	},
 	computed: {
