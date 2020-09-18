@@ -12,7 +12,7 @@ Accepts the following query params:
 - `auto` - enable auto-refresh (every 15 seconds)
 - `hideempty` - hide empty servers, i.e. only show servers with musicians connected.
 
-For example: `http://jamulus.softins.co.uk/?central=worldjam.vip&auto`
+For example: http://jamulus.softins.co.uk/?central=worldjam.vip&auto
 
 ---
 
