@@ -37,7 +37,7 @@
 					<th class="click ping right" @click="sortBy('ping')">Ping (ms) {{ sortby=='ping' ? arrow : '' }}</th>
 					<th class="click ip left" @click="sortBy('numip')">IP {{ sortby=='numip' ? arrow : '' }}</th>
 					<th class="click port right" @click="sortBy('port')">Port {{ sortby=='port' ? arrow : '' }}</th>
-					<th class="click version left" @click="sortBy('version')">Version {{ sortby=='version' ? arrow : '' }}</th>
+					<th class="click version left" @click="sortBy('versionsort')">Version {{ sortby=='versionsort' ? arrow : '' }}</th>
 					<th class="click os left" @click="sortBy('os')">OS {{ sortby=='os' ? arrow : '' }}</th>
 				</tr>
 			</thead>
