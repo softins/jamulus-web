@@ -3,7 +3,7 @@
 VueJS front end to display Jamulus servers and participants,
 available at http://jamulus.softins.co.uk
 
-Uses `server.php` from [jamulus-php](https://github.com/softins/jamulus-php)
+Uses `servers.php` from [jamulus-php](https://github.com/softins/jamulus-php)
 as a back-end to fetch the information from the servers.
 
 Accepts the following query params:
