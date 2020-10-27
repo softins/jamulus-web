@@ -21,7 +21,7 @@
 		<table v-if="servers && servers.length" class="servers">
 			<thead>
 				<tr>
-					<td colspan=7 class="left"><ul>
+					<td colspan=8 class="left"><ul>
 							<li>Central server address: <strong>{{ centralServer }}</strong></li>
 							<li>The ping time shown is from this site's server at Linode in London.</li>
 							<li>Click on a column heading to sort by that column.</li>
@@ -34,6 +34,7 @@
 					<th class="click name left" @click="sortBy('name')">Name {{ sortby=='name' ? arrow : '' }}</th>
 					<th class="click city left" @click="sortBy('city')">City {{ sortby=='city' ? arrow : '' }}</th>
 					<th class="click country left" @click="sortBy('country')">Country {{ sortby=='country' ? arrow : '' }}</th>
+					<th class="click maxclients" @click="sortBy('maxclients')">Clients {{ sortby=='maxclients' ? arrow : '' }}</th>
 					<th class="click ping right" @click="sortBy('ping')">Ping (ms) {{ sortby=='ping' ? arrow : '' }}</th>
 					<th class="click ip left" @click="sortBy('numip')">IP {{ sortby=='numip' ? arrow : '' }}</th>
 					<th class="click port right" @click="sortBy('port')">Port {{ sortby=='port' ? arrow : '' }}</th>
@@ -48,6 +49,7 @@
 					<td class="name left">{{ s.name }}</td>
 					<td class="city left">{{ s.city }}</td>
 					<td class="country left">{{ s.country }}</td>
+					<td class="maxclients nowrap">{{ s.nclients || 0 }} / {{ s.maxclients }}</td>
 					<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
 					<td class="ip left">{{ s.ip }}</td>
 					<td class="port right">{{ s.port2 ? '('+s.port2+') '+s.port : s.port }}</td>
@@ -55,7 +57,7 @@
 					<td class="os left">{{ s.os }}</td>
 				</tr>
 				<tr :key="'b'+s.index" v-if="s.clients && s.clients.length" :class="{even: !(index % 2), odd: index % 2}">
-					<td colspan=9 class="clientlist">
+					<td colspan=10 class="clientlist">
 						<table class="clients">
 							<thead>
 								<tr>
@@ -85,6 +87,7 @@
 					<th class="name left">Name</th>
 					<th class="city left">City</th>
 					<th class="country left">Country</th>
+					<th class="maxclients">Clients</th>
 					<th class="ping right">Ping (ms)</th>
 					<th class="ip left">IP</th>
 					<th class="port right">Port</th>
@@ -286,6 +289,10 @@ export default {
 
 .right {
 	text-align: right;
+}
+
+.nowrap {
+	white-space: nowrap;
 }
 
 .servers {
