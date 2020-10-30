@@ -49,7 +49,7 @@
 					<td class="name left">{{ s.name }}</td>
 					<td class="city left">{{ s.city }}</td>
 					<td class="country left">{{ s.country }}</td>
-					<td class="maxclients nowrap">{{ s.nclients || 0 }} / {{ s.maxclients }}</td>
+					<td class="maxclients nowrap">{{ s.nclients || 0 }} / {{ s.maxclients || '??' }}</td>
 					<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
 					<td class="ip left">{{ s.ip }}</td>
 					<td class="port right">{{ s.port2 ? '('+s.port2+') '+s.port : s.port }}</td>
