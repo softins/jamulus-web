@@ -147,6 +147,8 @@
 <script>
 // import servers from './sample.js'
 
+const backendURL = "http://jamulus.softins.co.uk/servers.php"
+
 import options from './servers.js';
 import Modal from './Modal'
 import { mixin as focusMixin } from 'vue-focus'
@@ -306,7 +308,7 @@ export default {
 				this.queriedServer = this.chosenServer
 				this.loading = true
 				this.$http
-					.get('http://jamulus.softins.co.uk/servers.php?' + this.chosenType + '=' + this.chosenServer)
+					.get(backendURL + '?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
 						if (this.queriedServer != this.chosenServer) return;
 						this.fetched = new Date()
@@ -334,7 +336,7 @@ export default {
 			if (this.chosenServer != '') {
 				this.queriedServer = this.chosenServer
 				this.$http
-					.get('http://jamulus.softins.co.uk/servers.php?' + this.chosenType + '=' + this.chosenServer)
+					.get(backendURL + '?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
 						if (this.queriedServer != this.chosenServer) return;
 						this.fetched = new Date()
