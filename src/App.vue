@@ -2,27 +2,32 @@
 	<div id="app">
 		<h1>Jamulus Explorer</h1>
 		<p class="options" v-if="!fixedServer">
-			<select v-model="centralServer" @change="setServer">
+			<select v-model="server" @change="setServer">
 				<option value="" selected>Select server...</option>
-				<option value="jamulus.fischvolk.de:22124">Default server</option>
-				<option value="jamulusallgenres.fischvolk.de:22224">All Genres</option>
-				<option value="jamulusrock.fischvolk.de:22424">Genre Rock</option>
-				<option value="jamulusjazz.fischvolk.de:22324">Genre Jazz</option>
-				<option value="jamulusclassical.fischvolk.de:22524">Genre Classical/Folk/Choir</option>
-				<option value="worldjam.vip:22124">Worldjam server</option>
+				<optgroup v-if="options.central.length" label="Public central servers">
+				<option v-for="(c, index) in options.central" :value="c.server" :key="index">{{ c.desc }}</option>
+				</optgroup>
+				<optgroup v-if="options.extra.length" label="Custom central servers">
+				<option v-for="(c, index) in options.extra" :value="c.server" :key="index">{{ c.desc }}</option>
+				</optgroup>
+				<optgroup v-if="options.single.length" label="Custom single servers">
+				<option v-for="(c, index) in options.single" :value="'='+c.server" :key="index">{{ c.desc }}</option>
+				</optgroup>
 			</select>
+
+			<button @click="editList">Edit server list</button>
 
 			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label> (every 10-15 sec)
 			<label>Hide empty servers:<input type="checkbox" value="1" v-model="hideempty"></label>
 		</p>
 			<div v-if="loading">Loading...</div>
-			<div v-if="errored">Error fetching from {{centralServer}}</div>
-			<div v-if="centralServer && !loading && (!servers || !servers.length)">No data from {{centralServer}}</div>
+			<div v-if="errored">Error fetching from {{chosenServer}}</div>
+			<div v-if="chosenServer && !loading && (!servers || !servers.length)">No data from {{chosenServer}}</div>
 		<table v-if="servers && servers.length" class="servers">
 			<thead>
 				<tr>
 					<td colspan=8 class="left"><ul>
-							<li>Central server address: <strong>{{ centralServer }}</strong></li>
+							<li>{{ chosenType == 'central' ? 'Central' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
 							<li>The ping time shown is from this site's server at Linode in London.</li>
 							<li>Click on a column heading to sort by that column.</li>
 						</ul>
@@ -49,7 +54,7 @@
 					<td class="name left">{{ s.name }}</td>
 					<td class="city left">{{ s.city }}</td>
 					<td class="country left">{{ s.country }}</td>
-					<td class="maxclients nowrap">{{ s.nclients || 0 }} / {{ s.maxclients || '??' }}</td>
+					<td class="maxclients nowrap">{{ s.nclients || 0 }}{{ s.maxclients ? ' / ' + s.maxclients : '' }}</td>
 					<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
 					<td class="ip left">{{ s.ip }}</td>
 					<td class="port right">{{ s.port2 ? '('+s.port2+') '+s.port : s.port }}</td>
@@ -104,12 +109,15 @@
 <script>
 // import servers from './sample.js'
 
+import options from './servers.js';
+
 export default {
 	name: 'App',
 	data() {
 		return {
+			options: options,
 			servers: [],
-			centralServer: '',
+			server: '',
 			queriedServer: '',
 			fixedServer: false,
 			errored: false,
@@ -133,8 +141,15 @@ export default {
 			this.hideempty = true;
 		}
 		if (urlParams.has('central')) {
-			this.centralServer = urlParams.get('central');
-			if (this.centralServer) {
+			this.server = urlParams.get('central');
+			if (this.server) {
+				this.fixedServer = true;
+			}
+		}
+		if (urlParams.has('server')) {
+			this.server = urlParams.get('server');
+			if (this.server) {
+				this.server = '=' + this.server;
 				this.fixedServer = true;
 			}
 		}
@@ -145,6 +160,12 @@ export default {
 		}
 	},
 	computed: {
+		chosenServer() {
+			return this.server[0] == '=' ? this.server.substring(1) : this.server;
+		},
+		chosenType() {
+			return this.server[0] == '=' ? 'server' : 'central';
+		},
 		servertxt() {
 			return this.servers.length == 1 ? 'server' : 'servers';
 		},
@@ -219,17 +240,17 @@ export default {
 				clearTimeout(this.timer);
 				this.timer = null;
 			}
-			console.log('setServer: centralServer changed to ' + this.centralServer);
+			console.log('setServer: server changed to ' + this.chosenServer);
 			this.servers = [];
 			this.errored = false;
-			if (this.centralServer != '') {
+			if (this.chosenServer != '') {
 				//this.servers = servers;
-				this.queriedServer = this.centralServer
+				this.queriedServer = this.chosenServer
 				this.loading = true
 				this.$http
-					.get('http://jamulus.softins.co.uk/servers.php?central=' + this.centralServer)
+					.get('http://jamulus.softins.co.uk/servers.php?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
-						if (this.queriedServer != this.centralServer) return;
+						if (this.queriedServer != this.chosenServer) return;
 						this.fetched = new Date()
 						this.servers = response.data
 						//var self = this;
@@ -246,12 +267,12 @@ export default {
 		refreshServer() {
 			this.timer = null;
 			this.errored = false;
-			if (this.centralServer != '') {
-				this.queriedServer = this.centralServer
+			if (this.chosenServer != '') {
+				this.queriedServer = this.chosenServer
 				this.$http
-					.get('http://jamulus.softins.co.uk/servers.php?central=' + this.centralServer)
+					.get('http://jamulus.softins.co.uk/servers.php?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
-						if (this.queriedServer != this.centralServer) return;
+						if (this.queriedServer != this.chosenServer) return;
 						this.fetched = new Date()
 						this.servers = response.data
 						//var self = this;
@@ -264,6 +285,9 @@ export default {
 					})
 					.finally(() => this.loading = false)
 			}
+		},
+		editList() {
+			//alert("Edit list");
 		}
 	}
 }
@@ -354,6 +378,9 @@ ul {
 }
 label {
 	margin-left: 3em;
+}
+button {
+	margin-left: 1em;
 }
 .copyright {
   border-top: 1px lightgrey solid;
