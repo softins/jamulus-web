@@ -15,14 +15,14 @@
 				</optgroup>
 			</select>
 
-			<button @click="editList">Edit server list</button>
+			<button @click="editList = true">Edit server list</button>
 
 			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label> (every 10-15 sec)
 			<label>Hide empty servers:<input type="checkbox" value="1" v-model="hideempty"></label>
 		</p>
-			<div v-if="loading">Loading...</div>
-			<div v-if="errored">Error fetching from {{chosenServer}}</div>
-			<div v-if="chosenServer && !loading && (!servers || !servers.length)">No data from {{chosenServer}}</div>
+		<div v-if="loading">Loading...</div>
+		<div v-if="errored">Error fetching from {{chosenServer}} ({{ errorMsg }})</div>
+		<div v-if="chosenServer && !loading && !errored && (!servers || !servers.length)">No data from {{chosenServer}}</div>
 		<table v-if="servers && servers.length" class="servers">
 			<thead>
 				<tr>
@@ -103,6 +103,44 @@
 			</tbody>
 		</table>
 		<div class="copyright">&copy; 2020 <a href="https://tony.mountifield.org">Tony Mountifield</a> :: Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a></div>
+		<modal v-if="editList" @close="editList = false" @cancel="editList = false" :close="'Done'" :nofocus="true" :width="600">
+		<h3 id="editlist" slot="header">Edit server list</h3>
+		<p>This form allows custom central servers or single servers to be added or removed. They will be remembered in the browser's local storage. If not specified, the port defaults to 22124.</p>
+		<table width="100%">
+			<tbody>
+				<tr><td colspan=5><hr></td></tr>
+				<tr><th colspan=5>Custom central servers</th></tr>
+				<tr v-for="(c, index) in options.extra" :key="'a'+index">
+					<td>{{ c.desc }}</td>
+					<td>{{ c.server }}</td>
+					<td><button class="arrow" v-if="index < options.extra.length-1" @click="moveDown(options.extra, index)">&darr;</button></td>
+					<td><button class="arrow" v-if="index > 0" @click="moveUp(options.extra, index)">&uarr;</button></td>
+					<td><button @click="deleteServer('extra', options.extra, index)">Delete</button></td>
+				</tr>
+				<tr>
+					<td><input type="text" placeholder="Description" v-model="custom.desc"></td>
+					<td><input type="text" placeholder="Domain or IP" v-model="custom.name"></td>
+					<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="custom.port"></td>
+					<td><button :disabled="custom.desc == '' || custom.name == ''" @click="addServer('extra', options.extra, custom)">Add</button></td>
+				</tr>
+				<tr><td colspan=5><hr></td></tr>
+				<tr><th colspan=5>Custom single servers</th></tr>
+				<tr v-for="(c, index) in options.single" :key="'b'+index">
+					<td>{{ c.desc }}</td>
+					<td>{{ c.server }}</td>
+					<td><button class="arrow" v-if="index < options.single.length-1" @click="moveDown(options.single, index)">&darr;</button></td>
+					<td><button class="arrow" v-if="index > 0" @click="moveUp(options.single, index)">&uarr;</button></td>
+					<td><button @click="deleteServer('single', options.single, index)">Delete</button></td>
+				</tr>
+				<tr>
+					<td><input type="text" placeholder="Description" v-model="single.desc"></td>
+					<td><input type="text" placeholder="Domain or IP" v-model="single.name"></td>
+					<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="single.port"></td>
+					<td><button :disabled="single.desc == '' || single.name == ''" @click="addServer('single', options.single, single)">Add</button></td>
+				</tr>
+			</tbody>
+		</table>
+		</modal>
 	</div>
 </template>
 
@@ -110,9 +148,13 @@
 // import servers from './sample.js'
 
 import options from './servers.js';
+import Modal from './Modal'
+import { mixin as focusMixin } from 'vue-focus'
 
 export default {
 	name: 'App',
+	mixins: [focusMixin],
+	components: { Modal },
 	data() {
 		return {
 			options: options,
@@ -121,6 +163,7 @@ export default {
 			queriedServer: '',
 			fixedServer: false,
 			errored: false,
+			errorMsg: '',
 			loading: false,
 			fetched: null,
 			timer: null,
@@ -129,7 +172,18 @@ export default {
 			sortup: 1,
 			sortby: null,
 			refresh: false,
-			hideempty: false
+			hideempty: false,
+			editList: false,
+			custom: {
+				desc: '',
+				name: '',
+				port: ''
+			},
+			single: {
+				desc: '',
+				name: '',
+				port: ''
+			}
 		}
 	},
 	created() {
@@ -140,6 +194,7 @@ export default {
 		if (urlParams.has('hideempty')) {
 			this.hideempty = true;
 		}
+		this.server = '';
 		if (urlParams.has('central')) {
 			this.server = urlParams.get('central');
 			if (this.server) {
@@ -157,6 +212,9 @@ export default {
 	mounted() {
 		if (this.fixedServer) {
 			this.setServer();
+		} else {
+			this.options.extra = JSON.parse(localStorage.getItem('extra')) || [];
+			this.options.single = JSON.parse(localStorage.getItem('single')) || [];
 		}
 	},
 	computed: {
@@ -252,7 +310,13 @@ export default {
 					.then(response => {
 						if (this.queriedServer != this.chosenServer) return;
 						this.fetched = new Date()
-						this.servers = response.data
+						if (response.data.error) {
+							this.errored = true;
+							this.errorMsg = response.data.error;
+							this.servers = [];
+						} else {
+							this.servers = response.data
+						}
 						//var self = this;
 						//this.timer = setTimeout(self.refreshServer, 10000);
 						if (this.refresh) this.timer = setTimeout(this.refreshServer, 10000);
@@ -274,7 +338,13 @@ export default {
 					.then(response => {
 						if (this.queriedServer != this.chosenServer) return;
 						this.fetched = new Date()
-						this.servers = response.data
+						if (response.data.error) {
+							this.errored = true;
+							this.errorMsg = response.data.error;
+							this.servers = [];
+						} else {
+							this.servers = response.data
+						}
 						//var self = this;
 						//this.timer = setTimeout(self.refreshServer, 10000);
 						if (this.refresh) this.timer = setTimeout(this.refreshServer, 10000);
@@ -286,8 +356,35 @@ export default {
 					.finally(() => this.loading = false)
 			}
 		},
-		editList() {
-			//alert("Edit list");
+		moveUp(list, index) {
+			if (index == 0) return;
+			var tmp = list[index-1];
+			list[index-1] = list[index];
+			list[index] = tmp;
+			this.$forceUpdate();
+		},
+		moveDown(list, index) {
+			if (index+1 >= list.length) return;
+			var tmp = list[index+1];
+			list[index+1] = list[index];
+			list[index] = tmp;
+			this.$forceUpdate();
+		},
+		addServer(kind, list, detail) {
+			if (detail.desc == '' || detail.name == '') return;
+			//console.log({list, detail});
+			list.push({ desc: detail.desc, server: detail.name + ':' + (detail.port || 22124)});
+			detail.desc = '';
+			detail.name = '';
+			detail.port = '';
+			localStorage.setItem(kind, JSON.stringify(list));
+		},
+		deleteServer(kind, list, index) {
+			//console.log({list, index});
+			list.splice(index,1);
+			localStorage.setItem(kind, JSON.stringify(list));
+			this.server = '';
+			this.setServer();
 		}
 	}
 }
@@ -381,6 +478,10 @@ label {
 }
 button {
 	margin-left: 1em;
+}
+button.arrow {
+	margin: 0;
+	font-weight: bold;
 }
 .copyright {
   border-top: 1px lightgrey solid;
