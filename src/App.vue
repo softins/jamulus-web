@@ -102,6 +102,7 @@
 				</template>
 			</tbody>
 		</table>
+		<p v-if="!loading && !errored && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
 		<div class="copyright">&copy; 2020 <a href="https://tony.mountifield.org">Tony Mountifield</a> :: Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a></div>
 		<modal v-if="editList" @close="editList = false" @cancel="editList = false" :close="'Done'" :nofocus="true" :width="600">
 		<h3 id="editlist" slot="header">Edit server list</h3>
@@ -115,13 +116,13 @@
 					<td>{{ c.server }}</td>
 					<td><button class="arrow" v-if="index < options.extra.length-1" @click="moveDown(options.extra, index)">&darr;</button></td>
 					<td><button class="arrow" v-if="index > 0" @click="moveUp(options.extra, index)">&uarr;</button></td>
-					<td><button @click="deleteServer('extra', options.extra, index)">Delete</button></td>
+					<td><button @click="deleteServer('central', options.extra, index)">Delete</button></td>
 				</tr>
 				<tr>
 					<td><input type="text" placeholder="Description" v-model="custom.desc"></td>
 					<td><input type="text" placeholder="Domain or IP" v-model="custom.name"></td>
 					<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="custom.port"></td>
-					<td><button :disabled="custom.desc == '' || custom.name == ''" @click="addServer('extra', options.extra, custom)">Add</button></td>
+					<td><button :disabled="custom.desc == '' || custom.name == ''" @click="addServer('central', options.extra, custom)">Add</button></td>
 				</tr>
 				<tr><td colspan=5><hr></td></tr>
 				<tr><th colspan=5>Custom single servers</th></tr>
@@ -130,13 +131,13 @@
 					<td>{{ c.server }}</td>
 					<td><button class="arrow" v-if="index < options.single.length-1" @click="moveDown(options.single, index)">&darr;</button></td>
 					<td><button class="arrow" v-if="index > 0" @click="moveUp(options.single, index)">&uarr;</button></td>
-					<td><button @click="deleteServer('single', options.single, index)">Delete</button></td>
+					<td><button @click="deleteServer('server', options.single, index)">Delete</button></td>
 				</tr>
 				<tr>
 					<td><input type="text" placeholder="Description" v-model="single.desc"></td>
 					<td><input type="text" placeholder="Domain or IP" v-model="single.name"></td>
 					<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="single.port"></td>
-					<td><button :disabled="single.desc == '' || single.name == ''" @click="addServer('single', options.single, single)">Add</button></td>
+					<td><button :disabled="single.desc == '' || single.name == ''" @click="addServer('server', options.single, single)">Add</button></td>
 				</tr>
 			</tbody>
 		</table>
@@ -215,8 +216,19 @@ export default {
 		if (this.fixedServer) {
 			this.setServer();
 		} else {
-			this.options.extra = JSON.parse(localStorage.getItem('extra')) || [];
-			this.options.single = JSON.parse(localStorage.getItem('single')) || [];
+			// temporary code because of name changes
+			var s;
+			if ((s = localStorage.getItem('extra'))) {
+				localStorage.removeItem('extra');
+				localStorage.setItem('central', s);
+			}
+			if ((s = localStorage.getItem('single'))) {
+				localStorage.removeItem('single');
+				localStorage.setItem('server', s);
+			}
+			// end of temporary code
+			this.options.extra = JSON.parse(localStorage.getItem('central')) || [];
+			this.options.single = JSON.parse(localStorage.getItem('server')) || [];
 		}
 	},
 	computed: {
@@ -382,11 +394,13 @@ export default {
 			localStorage.setItem(kind, JSON.stringify(list));
 		},
 		deleteServer(kind, list, index) {
-			//console.log({list, index});
+			console.log({curtype: this.chosenType, cursrv: this.chosenServer, kind, list, index});
+			if (kind == this.chosenType && list[index].server == this.chosenServer) {
+				this.server = '';
+				this.setServer();
+			}
 			list.splice(index,1);
 			localStorage.setItem(kind, JSON.stringify(list));
-			this.server = '';
-			this.setServer();
 		}
 	}
 }
