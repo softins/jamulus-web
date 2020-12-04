@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "core-js": "^3.6.4",
+    "core-js": "^3.8.0",
     "es6-promise": "^4.2.8",
-    "vue": "^2.6.11",
+    "vue": "^2.6.12",
     "vue-focus": "^2.1.0"
   },
   "devDependencies": {
@@ -21,7 +21,7 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.12"
   },
   "eslintConfig": {
     "root": true,
