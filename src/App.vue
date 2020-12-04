@@ -148,7 +148,7 @@
 <script>
 // import servers from './sample.js'
 
-const backendURL = "http://jamulus.softins.co.uk/servers.php"
+const backendURL = window.location.protocol+"//"+window.location.hostname+"/servers.php"
 
 import options from './servers.js';
 import Modal from './Modal'
