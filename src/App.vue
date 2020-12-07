@@ -103,7 +103,12 @@
 			</tbody>
 		</table>
 		<p v-if="!loading && !errored && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
-		<div class="copyright">&copy; 2020 <a href="https://tony.mountifield.org">Tony Mountifield</a> :: Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a></div>
+		<div class="copyright">&copy; 2020 <a href="https://tony.mountifield.org">Tony Mountifield</a>
+			::
+			Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
+			::
+			For more about online jamming with Jamulus, see <a href="https://jamulus.io">jamulus.io</a>
+		</div>
 		<modal v-if="editList" @close="editList = false" @cancel="editList = false" :close="'Done'" :nofocus="true" :width="600">
 		<h3 id="editlist" slot="header">Edit server list</h3>
 		<p>This form allows custom central servers or single servers to be added or removed. They will be remembered in the browser's local storage. If not specified, the port defaults to 22124.</p>
