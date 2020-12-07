@@ -1,7 +1,11 @@
 # jamulus-web (Jamulus Explorer)
 
 VueJS front end to display Jamulus servers and participants,
-available at http://jamulus.softins.co.uk
+available at https://explorer.jamulus.io
+
+It was originally available at http://jamulus.softins.co.uk, which still works,
+but redirects to the address above.
+
 
 Uses `servers.php` from [jamulus-php](https://github.com/softins/jamulus-php)
 as a back-end to fetch the information from the servers.
@@ -12,7 +16,7 @@ Accepts the following query params:
 - `auto` - enable auto-refresh (every 15 seconds)
 - `hideempty` - hide empty servers, i.e. only show servers with musicians connected.
 
-For example: http://jamulus.softins.co.uk/?central=worldjam.vip&auto
+For example: https://explorer.jamulus.io/?central=worldjam.vip&auto
 
 ---
 
