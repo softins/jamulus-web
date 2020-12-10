@@ -153,7 +153,7 @@
 <script>
 // import servers from './sample.js'
 
-const backendURL = window.location.protocol+"//"+window.location.hostname+"/servers.php"
+const backendURL = "https://explorer.jamulus.io/servers.php"
 
 import options from './servers.js';
 import Modal from './Modal'
