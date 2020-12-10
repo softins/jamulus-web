@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "core-js": "^3.8.0",
+    "core-js": "^3.8.1",
     "es6-promise": "^4.2.8",
     "vue": "^2.6.12",
     "vue-focus": "^2.1.0"
