@@ -49,7 +49,7 @@
 			</thead>
 			<tbody>
 				<template v-for="(s, index) in sortedServers">
-				<tr :key="'a'+s.index" :class="{perm: s.perm, even: !(index % 2), odd: index % 2}">
+				<tr :key="'a'+s.index" :class="{server: true, perm: s.perm, even: !(index % 2), odd: index % 2}">
 					<td class="num right">{{ s.index }}</td>
 					<td class="name left">{{ s.name }}</td>
 					<td class="city left">{{ s.city }}</td>
@@ -445,6 +445,10 @@ export default {
 	border-collapse: collapse;
 }
 
+.servers tr.server {
+	cursor: pointer;
+}
+
 .servers tr th, .servers tr td {
 	padding: .3em;
 }
@@ -456,6 +460,9 @@ export default {
 }
 .servers tr.odd td {
 	background-color: #ddddcc;
+}
+.servers tr.server:hover td {
+	background-color: #f4f4f4;
 }
 .perm td {
 	font-weight: bold;
