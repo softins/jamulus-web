@@ -12,7 +12,8 @@
     "core-js": "^3.9.1",
     "es6-promise": "^4.2.8",
     "vue": "^2.6.12",
-    "vue-focus": "^2.1.0"
+    "vue-focus": "^2.1.0",
+    "vue-sanitize": "^0.2.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.11",
