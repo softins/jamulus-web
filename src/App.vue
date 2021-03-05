@@ -30,6 +30,7 @@
 							<li>{{ chosenType == 'central' ? 'Central' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
 							<li>The ping time shown is from this site's server at Linode in London.</li>
 							<li>Click on a column heading to sort by that column.</li>
+							<li><span class="new">NEW</span> Click on a server name to see the Welcome Message (if any). Not available if server is full.</li>
 						</ul>
 					</td>
 					<td colspan=2>{{ servers.length }} {{ servertxt }}.<br>Last updated:<br>{{ lastFetch }}</td>
@@ -51,7 +52,8 @@
 				<template v-for="(s, index) in sortedServers">
 				<tr :key="'a'+s.index" :class="{perm: s.perm, even: !(index % 2), odd: index % 2}">
 					<td class="num right">{{ s.index }}</td>
-					<td class="name left">{{ s.name }}</td>
+					<td v-if="s.nclients && s.nclients >= s.maxclients" class="name left nolink">{{ s.name }}</td>
+					<td v-else class="name left link" @click="fetchWelcome(s)">{{ s.name }}</td>
 					<td class="city left">{{ s.city }}</td>
 					<td class="country left">{{ s.country }}</td>
 					<td class="maxclients nowrap">{{ s.nclients || 0 }}{{ s.maxclients ? ' / ' + s.maxclients : '' }}</td>
@@ -103,7 +105,7 @@
 			</tbody>
 		</table>
 		<p v-if="!loading && !errored && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
-		<div class="copyright">&copy; 2020 <a href="https://tony.mountifield.org">Tony Mountifield</a>
+		<div class="copyright">&copy; 2020-2021 <a href="https://tony.mountifield.org">Tony Mountifield</a>
 			::
 			Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
 			::
@@ -147,6 +149,11 @@
 			</tbody>
 		</table>
 		</modal>
+		<modal v-if="showWelcome" @close="showWelcome = false" @cancel="showWelcome = false" :nofocus="true" :width="600">
+		<h3 id="showwelcome" slot="header">Welcome message for {{ welcomeSvr }}</h3>
+		<hr>
+		<div><span v-html="welcomeMsg"></span></div>
+		</modal>
 	</div>
 </template>
 
@@ -182,6 +189,9 @@ export default {
 			refresh: false,
 			hideempty: false,
 			editList: false,
+			showWelcome: false,
+			welcomeMsg: '',
+			welcomeSvr: '',
 			custom: {
 				desc: '',
 				name: '',
@@ -294,6 +304,29 @@ export default {
 		}
 	},
 	methods: {
+		fetchWelcome(s) {
+			this.welcomeMsg = 'Loading...';
+			this.welcomeSvr = s.name;
+			this.showWelcome = true;
+			this.$http
+				.get(backendURL + '?query=' + s.ip + ':' + (s.port2 || s.port))
+				.then(response => {
+					console.log(s, response.data);
+					if (response.data.error) {
+						this.welcomeMsg = 'Error querying server';
+					} else if (response.data.length && response.data[0].welcome) {
+						this.welcomeMsg = this.$sanitize(response.data[0].welcome);
+					} else {
+						this.welcomeMsg = 'No welcome message';
+						console.log(response.data);
+					}
+					console.log(s.name, this.welcomeMsg)
+				})
+				.catch(error => {
+					console.log(s, error);
+				})
+				.finally(() => {});
+		},
 		newRefresh() {
 			if (this.refresh) {
 				if (!this.timer) {
@@ -433,8 +466,27 @@ export default {
 	text-align: right;
 }
 
+.nolink {
+	cursor: not-allowed;
+}
+
+.link {
+	cursor: pointer;
+}
+.link:hover {
+	text-decoration: underline;
+}
+
 .nowrap {
 	white-space: nowrap;
+}
+
+.new {
+	color: white;
+	background-color: red;
+	padding: 0 5px;
+	border-radius: 0.5em;
+	font-weight: bold;
 }
 
 .servers {
