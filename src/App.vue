@@ -175,7 +175,6 @@ export default {
 			options: options,
 			servers: [],
 			server: '',
-			queriedServer: '',
 			fixedServer: false,
 			errored: false,
 			errorMsg: '',
@@ -346,6 +345,7 @@ export default {
 			this.sortby = key;
 		},
 		setServer() {
+			var queriedServer;
 			if (this.timer) {
 				clearTimeout(this.timer);
 				this.timer = null;
@@ -355,19 +355,20 @@ export default {
 			this.errored = false;
 			if (this.chosenServer != '') {
 				//this.servers = servers;
-				this.queriedServer = this.chosenServer
+				queriedServer = this.chosenServer
 				this.loading = true
 				this.$http
 					.get(backendURL + '?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
-						if (this.queriedServer != this.chosenServer) return;
-						this.fetched = new Date()
-						if (response.data.error) {
-							this.errored = true;
-							this.errorMsg = response.data.error;
-							this.servers = [];
-						} else {
-							this.servers = response.data
+						if (queriedServer == this.chosenServer) {
+							this.fetched = new Date()
+							if (response.data.error) {
+								this.errored = true;
+								this.errorMsg = response.data.error;
+								this.servers = [];
+							} else {
+								this.servers = response.data
+							}
 						}
 						//var self = this;
 						//this.timer = setTimeout(self.refreshServer, 10000);
@@ -381,21 +382,23 @@ export default {
 			}
 		},
 		refreshServer() {
+			var queriedServer;
 			this.timer = null;
 			this.errored = false;
 			if (this.chosenServer != '') {
-				this.queriedServer = this.chosenServer
+				queriedServer = this.chosenServer
 				this.$http
 					.get(backendURL + '?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
-						if (this.queriedServer != this.chosenServer) return;
-						this.fetched = new Date()
-						if (response.data.error) {
-							this.errored = true;
-							this.errorMsg = response.data.error;
-							this.servers = [];
-						} else {
-							this.servers = response.data
+						if (queriedServer == this.chosenServer) {
+							this.fetched = new Date()
+							if (response.data.error) {
+								this.errored = true;
+								this.errorMsg = response.data.error;
+								this.servers = [];
+							} else {
+								this.servers = response.data
+							}
 						}
 						//var self = this;
 						//this.timer = setTimeout(self.refreshServer, 10000);
