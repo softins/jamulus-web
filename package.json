@@ -9,16 +9,16 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "core-js": "^3.9.1",
+    "core-js": "^3.12.1",
     "es6-promise": "^4.2.8",
     "vue": "^2.6.12",
     "vue-focus": "^2.1.0",
     "vue-sanitize": "^0.2.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.11",
-    "@vue/cli-plugin-eslint": "~4.5.11",
-    "@vue/cli-service": "~4.5.11",
+    "@vue/cli-plugin-babel": "^4.5.13",
+    "@vue/cli-plugin-eslint": "^4.5.13",
+    "@vue/cli-service": "^4.5.13",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
