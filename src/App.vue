@@ -30,7 +30,7 @@
 							<li>{{ chosenType == 'central' ? 'Central' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
 							<li>The ping time shown is from this site's server at Linode in London.</li>
 							<li>Click on a column heading to sort by that column.</li>
-							<li><span class="new">NEW</span> Click on a server name to see the Welcome Message (if any). Not available if server is full.</li>
+							<li>Click on a server name to see the Welcome Message (if any). Not available if server is full.</li>
 						</ul>
 					</td>
 					<td colspan=2>{{ servers.length }} {{ servertxt }}.<br>Last updated:<br>{{ lastFetch }}</td>
