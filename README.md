@@ -12,11 +12,12 @@ as a back-end to fetch the information from the servers.
 
 Accepts the following query params:
 
-- `central=<centralserver>` - query specified server only
+- `directory=<directoryserver>` - query specified server only
+- `central=<directoryserver>` - same, for backward compatibility
 - `auto` - enable auto-refresh (every 15 seconds)
 - `hideempty` - hide empty servers, i.e. only show servers with musicians connected.
 
-For example: https://explorer.jamulus.io/?central=worldjam.vip&auto
+For example: https://explorer.jamulus.io/?directory=worldjam.vip&auto
 
 ---
 

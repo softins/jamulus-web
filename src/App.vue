@@ -4,10 +4,10 @@
 		<p class="options" v-if="!fixedServer">
 			<select v-model="server" @change="setServer">
 				<option value="" selected>Select server...</option>
-				<optgroup v-if="options.central.length" label="Public central servers">
-				<option v-for="(c, index) in options.central" :value="c.server" :key="index">{{ c.desc }}</option>
+				<optgroup v-if="options.directory.length" label="Public directory servers">
+				<option v-for="(c, index) in options.directory" :value="c.server" :key="index">{{ c.desc }}</option>
 				</optgroup>
-				<optgroup v-if="options.extra.length" label="Custom central servers">
+				<optgroup v-if="options.extra.length" label="Custom directory servers">
 				<option v-for="(c, index) in options.extra" :value="c.server" :key="index">{{ c.desc }}</option>
 				</optgroup>
 				<optgroup v-if="options.single.length" label="Custom single servers">
@@ -27,7 +27,7 @@
 			<thead>
 				<tr>
 					<td colspan=8 class="left"><ul>
-							<li>{{ chosenType == 'central' ? 'Central' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
+							<li>{{ chosenType == 'directory' ? 'Directory' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
 							<li>The ping time shown is from this site's server at Linode in London.</li>
 							<li>Click on a column heading to sort by that column.</li>
 							<li>Click on a server name to see the Welcome Message (if any). Not available if server is full.</li>
@@ -104,7 +104,7 @@
 				</template>
 			</tbody>
 		</table>
-		<p v-if="!loading && !errored && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
+		<p v-if="!loading && !errored && servers && servers.length && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
 		<div class="copyright">&copy; 2020-2021 <a href="https://tony.mountifield.org">Tony Mountifield</a>
 			::
 			Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
@@ -113,23 +113,23 @@
 		</div>
 		<modal v-if="editList" @close="editList = false" @cancel="editList = false" :close="'Done'" :nofocus="true" :width="600">
 		<h3 id="editlist" slot="header">Edit server list</h3>
-		<p>This form allows custom central servers or single servers to be added or removed. They will be remembered in the browser's local storage. If not specified, the port defaults to 22124.</p>
+		<p>This form allows custom directory servers or single servers to be added or removed. They will be remembered in the browser's local storage. If not specified, the port defaults to 22124.</p>
 		<table width="100%">
 			<tbody>
 				<tr><td colspan=5><hr></td></tr>
-				<tr><th colspan=5>Custom central servers</th></tr>
+				<tr><th colspan=5>Custom directory servers</th></tr>
 				<tr v-for="(c, index) in options.extra" :key="'a'+index">
 					<td>{{ c.desc }}</td>
 					<td>{{ c.server }}</td>
 					<td><button class="arrow" v-if="index < options.extra.length-1" @click="moveDown(options.extra, index)">&darr;</button></td>
 					<td><button class="arrow" v-if="index > 0" @click="moveUp(options.extra, index)">&uarr;</button></td>
-					<td><button @click="deleteServer('central', options.extra, index)">Delete</button></td>
+					<td><button @click="deleteServer('directory', options.extra, index)">Delete</button></td>
 				</tr>
 				<tr>
 					<td><input type="text" placeholder="Description" v-model="custom.desc"></td>
 					<td><input type="text" placeholder="Domain or IP" v-model="custom.name"></td>
 					<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="custom.port"></td>
-					<td><button :disabled="custom.desc == '' || custom.name == ''" @click="addServer('central', options.extra, custom)">Add</button></td>
+					<td><button :disabled="custom.desc == '' || custom.name == ''" @click="addServer('directory', options.extra, custom)">Add</button></td>
 				</tr>
 				<tr><td colspan=5><hr></td></tr>
 				<tr><th colspan=5>Custom single servers</th></tr>
@@ -212,6 +212,12 @@ export default {
 			this.hideempty = true;
 		}
 		this.server = '';
+		if (urlParams.has('directory')) {
+			this.server = urlParams.get('directory');
+			if (this.server) {
+				this.fixedServer = true;
+			}
+		}
 		if (urlParams.has('central')) {
 			this.server = urlParams.get('central');
 			if (this.server) {
@@ -232,16 +238,20 @@ export default {
 		} else {
 			// temporary code because of name changes
 			var s;
+			if ((s = localStorage.getItem('central'))) {
+				localStorage.removeItem('central');
+				localStorage.setItem('directory', s);
+			}
 			if ((s = localStorage.getItem('extra'))) {
 				localStorage.removeItem('extra');
-				localStorage.setItem('central', s);
+				localStorage.setItem('directory', s);
 			}
 			if ((s = localStorage.getItem('single'))) {
 				localStorage.removeItem('single');
 				localStorage.setItem('server', s);
 			}
 			// end of temporary code
-			this.options.extra = JSON.parse(localStorage.getItem('central')) || [];
+			this.options.extra = JSON.parse(localStorage.getItem('directory')) || [];
 			this.options.single = JSON.parse(localStorage.getItem('server')) || [];
 		}
 	},
@@ -250,7 +260,7 @@ export default {
 			return this.server[0] == '=' ? this.server.substring(1) : this.server;
 		},
 		chosenType() {
-			return this.server[0] == '=' ? 'server' : 'central';
+			return this.server[0] == '=' ? 'server' : 'directory';
 		},
 		servertxt() {
 			return this.servers.length == 1 ? 'server' : 'servers';

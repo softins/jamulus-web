@@ -5,7 +5,7 @@ const servers = [
         "country": "Germany",
         "maxclients": 14,
         "perm": 1,
-        "name": "Central Server",
+        "name": "Directory Server",
         "ipaddrs": "",
         "city": "Frankfurt",
         "ping": 12,

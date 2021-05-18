@@ -1,4 +1,4 @@
-const central = [
+const directory = [
 	{ server: "anygenre1.jamulus.io:22124", desc: "Any Genre 1 (was Default)" },
 	{ server: "anygenre2.jamulus.io:22224", desc: "Any Genre 2 (was All Genres)" },
 	{ server: "anygenre3.jamulus.io:22624", desc: "Any Genre 3 (new)" },
@@ -16,7 +16,7 @@ let single = [
 ];
 
 export default {
-	central,
+	directory,
 	extra,
 	single
 };
