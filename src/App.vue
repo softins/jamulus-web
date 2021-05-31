@@ -22,7 +22,7 @@
 		</p>
 		<div v-if="loading">Loading...</div>
 		<div v-if="errored">Error fetching from {{chosenServer}} ({{ errorMsg }})</div>
-		<div v-if="chosenServer && !loading && !errored && (!servers || !servers.length)">No data from {{chosenServer}}</div>
+		<div v-if="chosenServer && !loading && !refreshing && !errored && (!servers || !servers.length)">No data from {{chosenServer}}</div>
 		<table v-if="servers && servers.length" class="servers">
 			<thead>
 				<tr>
@@ -160,7 +160,7 @@
 <script>
 // import servers from './sample.js'
 
-const backendURL = "https://explorer.jamulus.io/servers.php"
+const backendURL = "https://explorer.jamulus.io/servers2.php"
 
 import options from './servers.js';
 import Modal from './Modal'
@@ -179,6 +179,7 @@ export default {
 			errored: false,
 			errorMsg: '',
 			loading: false,
+			refreshing: false,
 			fetched: null,
 			timer: null,
 			uparrow: "\u25b2",
@@ -378,25 +379,30 @@ export default {
 								this.servers = [];
 							} else {
 								this.servers = response.data
+								this.errored = false;
 							}
 						}
 						//var self = this;
 						//this.timer = setTimeout(self.refreshServer, 10000);
-						if (this.refresh) this.timer = setTimeout(this.refreshServer, 10000);
 					})
 					.catch(error => {
-						console.log(error)
+						console.log('error', error)
 						this.errored = true
+						this.errorMsg = 'exception 1';
 					})
-					.finally(() => this.loading = false)
+					.finally(() => {
+						this.loading = false
+						if (this.refresh) this.timer = setTimeout(this.refreshServer, 10000);
+					})
 			}
 		},
 		refreshServer() {
 			var queriedServer;
 			this.timer = null;
-			this.errored = false;
+			//this.errored = false;
 			if (this.chosenServer != '') {
 				queriedServer = this.chosenServer
+				this.refreshing = true
 				this.$http
 					.get(backendURL + '?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
@@ -408,17 +414,21 @@ export default {
 								this.servers = [];
 							} else {
 								this.servers = response.data
+								this.errored = false;
 							}
 						}
 						//var self = this;
 						//this.timer = setTimeout(self.refreshServer, 10000);
-						if (this.refresh) this.timer = setTimeout(this.refreshServer, 10000);
 					})
 					.catch(error => {
-						console.log(error)
+						console.log('error', error)
 						this.errored = true
+						this.errorMsg = 'exception 2';
 					})
-					.finally(() => this.loading = false)
+					.finally(() => {
+						this.refreshing = false
+						if (this.refresh) this.timer = setTimeout(this.refreshServer, 10000);
+					})
 			}
 		},
 		moveUp(list, index) {
