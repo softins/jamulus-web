@@ -105,6 +105,7 @@
 			</tbody>
 		</table>
 		<p v-if="!loading && !errored && servers && servers.length && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
+		<p class="worldjam">&#127926; To learm about performing on WorldJam using Jamulus, visit <a href="https://worldjam.vip">worldjam.vip</a> &#127926;</p>
 		<div class="copyright">&copy; 2020-2021 <a href="https://tony.mountifield.org">Tony Mountifield</a>
 			::
 			Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
@@ -569,9 +570,16 @@ button.arrow {
 	margin: 0;
 	font-weight: bold;
 }
+.worldjam {
+	font-size: 85%;
+	font-weight: bold;
+	color: #0000cc;
+	padding: 2px;
+  margin: 2em auto 0 auto;
+}
 .copyright {
   border-top: 1px lightgrey solid;
-  margin-top: 3em;
+  margin-top: 1em;
   padding-top: 1em;
   font-size: 80%;
   color: grey;
