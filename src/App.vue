@@ -33,7 +33,7 @@
 							<li>Click on a server name to see the Welcome Message (if any). Not available if server is full.</li>
 						</ul>
 					</td>
-					<td colspan=2>{{ servers.length }} {{ servertxt }}.<br>Last updated:<br>{{ lastFetch }}</td>
+					<td colspan=2><template v-if="hideempty">{{ sortedServers.length }} of </template>{{ servers.length }} {{ servertxt }}.<br>Last updated:<br>{{ lastFetch }}</td>
 				</tr>
 				<tr>
 					<th class="click num right" @click="sortBy('index')"># {{ sortby=='index' ? arrow : '' }}</th>
@@ -106,7 +106,7 @@
 		</table>
 		<p v-if="!loading && !errored && servers && servers.length && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
 		<p class="worldjam">&#127926; To learn about performing on WorldJam using Jamulus, visit <a href="https://worldjam.vip">worldjam.vip</a> &#127926;</p>
-		<div class="copyright">&copy; 2020-2021 <a href="https://tony.mountifield.org">Tony Mountifield</a>
+		<div class="copyright">&copy; 2020-2022 <a href="https://tony.mountifield.org">Tony Mountifield</a>
 			::
 			Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
 			::
