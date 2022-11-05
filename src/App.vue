@@ -2,6 +2,10 @@
 	<div id="app">
 		<h1>Jamulus Explorer</h1>
 		<p class="options" v-if="!fixedServer">
+			<select v-model="usebackend" @change="setServer">
+				<option v-for="(b, index) in backends" :value="index" :key="index">{{ b.city }}</option>
+			</select>
+			&nbsp;
 			<select v-model="server" @change="setServer">
 				<option value="" selected>Select server...</option>
 				<optgroup v-if="options.directory.length" label="Public directory servers">
@@ -20,6 +24,7 @@
 			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label> (every 10-15 sec)
 			<label>Hide empty servers:<input type="checkbox" value="1" v-model="hideempty"></label>
 		</p>
+		<div class="backendwarn" v-if="backendWarn">{{ backendWarn }}</div>
 		<div v-if="loading">Loading...</div>
 		<div v-if="errored">Error fetching from {{chosenServer}} ({{ errorMsg }})</div>
 		<div v-if="chosenServer && !loading && !errored && (!servers || !servers.length)">No data from {{chosenServer}}</div>
@@ -28,7 +33,7 @@
 				<tr>
 					<td colspan=8 class="left"><ul>
 							<li>{{ chosenType == 'directory' ? 'Directory' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
-							<li>The ping time shown is from this site's server at Linode in London.</li>
+							<li>The ping time shown is from this site's server at {{ backendDesc }}.</li>
 							<li>Click on a column heading to sort by that column.</li>
 							<li>Click on a server name to see the Welcome Message (if any). Not available if server is full.</li>
 						</ul>
@@ -161,7 +166,20 @@
 <script>
 // import servers from './sample.js'
 
-const backendURL = "https://explorer.jamulus.io/servers.php"
+const backends = [
+	{
+		city: 'London',
+		desc: 'Linode in London',
+		url: "https://explorer.jamulus.io/servers.php",
+		warn: 'NOTE: the London server is currently having issues connecting to some directories.'
+	},
+	{
+		city: 'San Francisco',
+		desc: 'DigitalOcean in San Francisco',
+		url: "https://explorer.jamulus.io/servers-sf.php",
+		warn: null
+	}
+];
 
 import options from './servers.js';
 import Modal from './Modal'
@@ -201,7 +219,9 @@ export default {
 				desc: '',
 				name: '',
 				port: ''
-			}
+			},
+			backends: backends,
+			usebackend: 0
 		}
 	},
 	created() {
@@ -257,6 +277,15 @@ export default {
 		}
 	},
 	computed: {
+		backendDesc() {
+			return this.backends[this.usebackend].desc;
+		},
+		backendURL() {
+			return this.backends[this.usebackend].url;
+		},
+		backendWarn() {
+			return this.backends[this.usebackend].warn;
+		},
 		chosenServer() {
 			return this.server[0] == '=' ? this.server.substring(1) : this.server;
 		},
@@ -319,7 +348,7 @@ export default {
 			this.welcomeSvr = s.name;
 			this.showWelcome = true;
 			this.$http
-				.get(backendURL + '?query=' + s.ip + ':' + (s.port2 || s.port))
+				.get(this.backendURL + '?query=' + s.ip + ':' + (s.port2 || s.port))
 				.then(response => {
 					console.log(s, response.data);
 					if (response.data.error) {
@@ -369,7 +398,7 @@ export default {
 				queriedServer = this.chosenServer
 				this.loading = true
 				this.$http
-					.get(backendURL + '?' + this.chosenType + '=' + this.chosenServer)
+					.get(this.backendURL + '?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
 						if (queriedServer == this.chosenServer) {
 							this.fetched = new Date()
@@ -399,7 +428,7 @@ export default {
 			if (this.chosenServer != '') {
 				queriedServer = this.chosenServer
 				this.$http
-					.get(backendURL + '?' + this.chosenType + '=' + this.chosenServer)
+					.get(this.backendURL + '?' + this.chosenType + '=' + this.chosenServer)
 					.then(response => {
 						if (queriedServer == this.chosenServer) {
 							this.fetched = new Date()
@@ -526,7 +555,11 @@ export default {
 .perm td {
 	font-weight: bold;
 }
-
+.backendwarn {
+	font-weight: bold;
+	color: #ee0000;
+	margin-bottom: 1em;
+}
 /*
 .clientlist {
 	background-color: #ffee99;
