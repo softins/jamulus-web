@@ -22,7 +22,7 @@
 			<button @click="editList = true">Edit server list</button>
 
 			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label> (every 10-15 sec)
-			<label>Hide empty servers:<input type="checkbox" value="1" v-model="hideempty"></label>
+			<label>Hide empty servers:<input type="checkbox" value="1" v-model="hideempty" @change="newHideEmpty"></label>
 		</p>
 		<div class="backendwarn" v-if="backendWarn">{{ backendWarn }}</div>
 		<div v-if="loading">Loading...</div>
@@ -260,9 +260,11 @@ export default {
 		}
 	},
 	mounted() {
-		if (this.fixedServer) {
-			this.setServer();
-		} else {
+		this.usebackend = localStorage.getItem('backend') || 0;
+		this.refresh = localStorage.getItem('refresh') == 'true';
+		this.hideempty = localStorage.getItem('hideempty') == 'true';
+
+		if (!this.fixedServer) {
 			// temporary code because of name changes
 			var s;
 			if ((s = localStorage.getItem('central'))) {
@@ -280,7 +282,11 @@ export default {
 			// end of temporary code
 			this.options.extra = JSON.parse(localStorage.getItem('directory')) || [];
 			this.options.single = JSON.parse(localStorage.getItem('server')) || [];
+
+			this.server = localStorage.getItem('useserver') || '';
 		}
+
+		this.setServer();
 	},
 	computed: {
 		backendDesc() {
@@ -373,6 +379,8 @@ export default {
 				.finally(() => {});
 		},
 		newRefresh() {
+			localStorage.setItem('refresh', this.refresh);
+
 			if (this.refresh) {
 				if (!this.timer) {
 					this.timer = setTimeout(this.refreshServer, 1);
@@ -381,6 +389,9 @@ export default {
 				clearTimeout(this.timer);
 				this.timer = null;
 			}
+		},
+		newHideEmpty() {
+			localStorage.setItem('hideempty', this.hideempty);
 		},
 		sortBy(key) {
 			if (key === this.sortby) {
@@ -396,6 +407,10 @@ export default {
 				clearTimeout(this.timer);
 				this.timer = null;
 			}
+
+			localStorage.setItem('useserver', this.server);
+			localStorage.setItem('backend', this.usebackend);
+
 			console.log('setServer: server changed to ' + this.chosenServer);
 			this.servers = [];
 			this.errored = false;
