@@ -6,7 +6,7 @@ const directory = [
 	{ server: "jazz.jamulus.io:22324", desc: "Genre Jazz" },
 	{ server: "classical.jamulus.io:22524", desc: "Genre Classical/Folk" },
 	{ server: "choral.jamulus.io:22724", desc: "Genre Choral/Barbershop" },
-	{ server: "worldjam.vip:22124", desc: "WorldJam" },
+	// { server: "worldjam.vip:22124", desc: "WorldJam" },
 ];
 
 let extra = [

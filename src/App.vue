@@ -110,7 +110,7 @@
 			</tbody>
 		</table>
 		<p v-if="!loading && !errored && servers && servers.length && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
-		<p class="worldjam">&#127926; To learn about performing on WorldJam using Jamulus, visit <a href="https://worldjam.vip">worldjam.vip</a> &#127926;</p>
+		<!-- <p class="worldjam">&#127926; To learn about performing on WorldJam using Jamulus, visit <a href="https://worldjam.vip">worldjam.vip</a> &#127926;</p> -->
 		<div class="copyright">&copy; 2020-2023 <a href="https://tony.mountifield.org">Tony Mountifield</a>
 			::
 			Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
