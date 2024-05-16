@@ -152,6 +152,17 @@
 					<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="single.port"></td>
 					<td><button :disabled="single.desc == '' || single.name == ''" @click="addServer('server', options.single, single)">Add</button></td>
 				</tr>
+				<tr><td colspan=5><hr></td></tr>
+				<tr>
+					<td colspan=5 class="centre">
+						<button @click="saveTextToFile">Save to file</button>
+						<label for="loadfile" class="loadfile">
+							<button type="button" @click="clickParent">Load from file</button>
+							<input type="file" accept="application/json" name="loadfile" id="loadfile" @change="loadTextFromFile" @click="resetFile">
+						</label>
+					</td>
+				</tr>
+				<tr><td colspan=5><hr></td></tr>
 			</tbody>
 		</table>
 		</modal>
@@ -506,6 +517,43 @@ export default {
 			}
 			list.splice(index,1);
 			localStorage.setItem(kind, JSON.stringify(list));
+		},
+		saveTextToFile() {
+			var data = {
+				directory: this.options.extra,
+				single: this.options.single
+			}
+			var file = new Blob([JSON.stringify(data)], {type: 'application/json;charset=utf-8'});
+
+			var anchor = document.createElement('a');
+			anchor.href = URL.createObjectURL(file);
+			anchor.download = 'explorer.json';
+			anchor.click();
+			URL.revokeObjectURL(anchor.href);
+		},
+		resetFile(e) {
+			e.target.value = '';
+		},
+		loadTextFromFile(e) {
+			var f = e.target.files;
+			var reader = new FileReader();
+			var options = this.options;
+
+			reader.onloadend = function() {
+				var data = JSON.parse(reader.result);
+				if (data.directory) {
+					options.extra = data.directory;
+					localStorage.setItem('directory', JSON.stringify(options.extra));
+				}
+				if (data.single) {
+					options.single = data.single;
+					localStorage.setItem('server', JSON.stringify(options.single));
+				}
+			}
+			reader.readAsText(f[0]);
+		},
+		clickParent(e) {
+			e.target.parentNode.click();
 		}
 	}
 }
@@ -525,6 +573,11 @@ export default {
 .click {
 	cursor: pointer;
 }
+
+.centre {
+	text-align: center;
+}
+
 .left {
 	text-align: left;
 }
@@ -648,5 +701,12 @@ button.arrow {
 
 .copyright a:hover {
 	text-decoration: underline;
+}
+
+label.loadfile input {
+	opacity: 0;
+	width: 0.1px;
+	height: 0.1px;
+	position: absolute;
 }
 </style>
