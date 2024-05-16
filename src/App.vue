@@ -127,8 +127,8 @@
 				<tr v-for="(c, index) in options.extra" :key="'a'+index">
 					<td>{{ c.desc }}</td>
 					<td>{{ c.server }}</td>
-					<td><button class="arrow" v-if="index < options.extra.length-1" @click="moveDown(options.extra, index)">&darr;</button></td>
-					<td><button class="arrow" v-if="index > 0" @click="moveUp(options.extra, index)">&uarr;</button></td>
+					<td><button class="arrow" v-if="index < options.extra.length-1" @click="moveDown('directory', options.extra, index)">&darr;</button></td>
+					<td><button class="arrow" v-if="index > 0" @click="moveUp('directory', options.extra, index)">&uarr;</button></td>
 					<td><button @click="deleteServer('directory', options.extra, index)">Delete</button></td>
 				</tr>
 				<tr>
@@ -142,8 +142,8 @@
 				<tr v-for="(c, index) in options.single" :key="'b'+index">
 					<td>{{ c.desc }}</td>
 					<td>{{ c.server }}</td>
-					<td><button class="arrow" v-if="index < options.single.length-1" @click="moveDown(options.single, index)">&darr;</button></td>
-					<td><button class="arrow" v-if="index > 0" @click="moveUp(options.single, index)">&uarr;</button></td>
+					<td><button class="arrow" v-if="index < options.single.length-1" @click="moveDown('server', options.single, index)">&darr;</button></td>
+					<td><button class="arrow" v-if="index > 0" @click="moveUp('server', options.single, index)">&uarr;</button></td>
 					<td><button @click="deleteServer('server', options.single, index)">Delete</button></td>
 				</tr>
 				<tr>
@@ -473,18 +473,20 @@ export default {
 					.finally(() => this.loading = false)
 			}
 		},
-		moveUp(list, index) {
+		moveUp(kind, list, index) {
 			if (index == 0) return;
 			var tmp = list[index-1];
 			list[index-1] = list[index];
 			list[index] = tmp;
+			localStorage.setItem(kind, JSON.stringify(list));
 			this.$forceUpdate();
 		},
-		moveDown(list, index) {
+		moveDown(kind, list, index) {
 			if (index+1 >= list.length) return;
 			var tmp = list[index+1];
 			list[index+1] = list[index];
 			list[index] = tmp;
+			localStorage.setItem(kind, JSON.stringify(list));
 			this.$forceUpdate();
 		},
 		addServer(kind, list, detail) {
