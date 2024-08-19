@@ -1,177 +1,179 @@
 <template>
-	<div id="app">
-		<h1>Jamulus Explorer</h1>
-		<p class="options" v-if="!fixedServer">
-			<select v-model="usebackend" @change="setServer">
-				<option v-for="(b, index) in backends" :value="index" :key="index">{{ b.city }}</option>
-			</select>
-			&nbsp;
-			<select v-model="server" @change="setServer">
-				<option value="" selected>Select server...</option>
-				<optgroup v-if="options.directory.length" label="Public directory servers">
-				<option v-for="(c, index) in options.directory" :value="c.server" :key="index">{{ c.desc }}</option>
-				</optgroup>
-				<optgroup v-if="options.extra.length" label="Custom directory servers">
-				<option v-for="(c, index) in options.extra" :value="c.server" :key="index">{{ c.desc }}</option>
-				</optgroup>
-				<optgroup v-if="options.single.length" label="Custom single servers">
-				<option v-for="(c, index) in options.single" :value="'='+c.server" :key="index">{{ c.desc }}</option>
-				</optgroup>
-			</select>
+	<h1>Jamulus Explorer</h1>
+	<p class="options" v-if="!fixedServer">
+		<select v-model="usebackend" @change="setServer">
+			<option v-for="(b, index) in backends" :value="index" :key="index">{{ b.city }}</option>
+		</select>
+		&nbsp;
+		<select v-model="server" @change="setServer">
+			<option value="" selected>Select server...</option>
+			<optgroup v-if="options.directory.length" label="Public directory servers">
+			<option v-for="(c, index) in options.directory" :value="c.server" :key="index">{{ c.desc }}</option>
+			</optgroup>
+			<optgroup v-if="options.extra.length" label="Custom directory servers">
+			<option v-for="(c, index) in options.extra" :value="c.server" :key="index">{{ c.desc }}</option>
+			</optgroup>
+			<optgroup v-if="options.single.length" label="Custom single servers">
+			<option v-for="(c, index) in options.single" :value="'='+c.server" :key="index">{{ c.desc }}</option>
+			</optgroup>
+		</select>
 
-			<button @click="editList = true">Edit server list</button>
+		<button @click="editList = true">Edit server list</button>
 
-			<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label> (every 10-15 sec)
-			<label>Hide empty servers:<input type="checkbox" value="1" v-model="hideempty" @change="newHideEmpty"></label>
-		</p>
-		<div class="backendwarn" v-if="backendWarn">{{ backendWarn }}</div>
-		<div v-if="loading">Loading...</div>
-		<div v-if="errored">Error fetching from {{chosenServer}} ({{ errorMsg }})</div>
-		<div v-if="chosenServer && !loading && !errored && (!servers || !servers.length)">No data from {{chosenServer}}</div>
-		<table v-if="servers && servers.length" class="servers">
-			<thead>
-				<tr>
-					<td colspan=8 class="left"><ul>
-							<li>{{ chosenType == 'directory' ? 'Directory' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
-							<li>The ping time shown is from this site's server at {{ backendDesc }}.</li>
-							<li>Click on a column heading to sort by that column.</li>
-							<li>Click on a server name to see the Welcome Message (if any). Not available if server is full.</li>
-						</ul>
-					</td>
-					<td colspan=2><template v-if="hideempty">{{ sortedServers.length }} of </template>{{ servers.length }} {{ servertxt }}.<br>Last updated:<br>{{ lastFetch }}</td>
-				</tr>
-				<tr>
-					<th class="click num right" @click="sortBy('index')"># {{ sortby=='index' ? arrow : '' }}</th>
-					<th class="click name left" @click="sortBy('name')">Name {{ sortby=='name' ? arrow : '' }}</th>
-					<th class="click city left" @click="sortBy('city')">City {{ sortby=='city' ? arrow : '' }}</th>
-					<th class="click country left" @click="sortBy('country')">Country {{ sortby=='country' ? arrow : '' }}</th>
-					<th class="click maxclients" @click="sortBy('maxclients')">Clients {{ sortby=='maxclients' ? arrow : '' }}</th>
-					<th class="click ping right" @click="sortBy('ping')">Ping (ms) {{ sortby=='ping' ? arrow : '' }}</th>
-					<th class="click ip left" @click="sortBy('numip')">IP {{ sortby=='numip' ? arrow : '' }}</th>
-					<th class="click port right" @click="sortBy('port')">Port {{ sortby=='port' ? arrow : '' }}</th>
-					<th class="click version left" @click="sortBy('versionsort')">Version {{ sortby=='versionsort' ? arrow : '' }}</th>
-					<th class="click os left" @click="sortBy('os')">OS {{ sortby=='os' ? arrow : '' }}</th>
-				</tr>
-			</thead>
-			<tbody>
-				<template v-for="(s, index) in sortedServers">
-				<tr :key="'a'+s.index" :class="{perm: s.perm, even: !(index % 2), odd: index % 2}">
-					<td class="num right">{{ s.index }}</td>
-					<td v-if="s.nclients && s.nclients >= s.maxclients" class="name left nolink">{{ s.name }}</td>
-					<td v-else class="name left link" @click="fetchWelcome(s)">{{ s.name }}</td>
-					<td class="city left">{{ s.city }}</td>
-					<td class="country left">{{ s.country }}</td>
-					<td class="maxclients nowrap">{{ s.nclients || 0 }}{{ s.maxclients ? ' / ' + s.maxclients : '' }}</td>
-					<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
-					<td class="ip left">{{ s.ip }}</td>
-					<td class="port right">{{ s.port2 ? '('+s.port2+') '+s.port : s.port }}</td>
-					<td class="version left">{{ s.version }}</td>
-					<td class="os left">{{ s.os }}</td>
-				</tr>
-				<tr :key="'b'+s.index" v-if="s.clients && s.clients.length" :class="{even: !(index % 2), odd: index % 2}">
-					<td colspan=10 class="clientlist">
-						<table class="clients">
-							<thead>
-								<tr>
-								<th class="chan right">Chan#</th>
-								<th class="name left">Name</th>
-								<th class="instrument left">Instrument</th>
-								<th class="skill left">Skill</th>
-								<th class="city left">City</th>
-								<th class="country left">Country</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="(c, index2) in s.clients" :key="index2" :class="{even: !(index2 % 2), odd: index2 % 2}">
-								<td class="chan right">{{ c.chanid }}</td>
-								<td class="name left">{{ c.name }}</td>
-								<td class="instrument left">{{ c.instrument }}</td>
-								<td class="skill left">{{ c.skill }}</td>
-								<td class="city left">{{ c.city }}</td>
-								<td class="country left">{{ c.country }}</td>
-								</tr>
-							</tbody>
-						</table>
-					</td>
-				</tr>
-				<tr :key="'c'+s.index" v-if="s.clients && s.clients.length">
-					<th class="num right">#</th>
-					<th class="name left">Name</th>
-					<th class="city left">City</th>
-					<th class="country left">Country</th>
-					<th class="maxclients">Clients</th>
-					<th class="ping right">Ping (ms)</th>
-					<th class="ip left">IP</th>
-					<th class="port right">Port</th>
-					<th class="version left">Version</th>
-					<th class="os left">OS</th>
-				</tr>
-				</template>
-			</tbody>
-		</table>
-		<p v-if="!loading && !errored && servers && servers.length && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
-		<!-- <p class="worldjam">&#127926; To learn about performing on WorldJam using Jamulus, visit <a href="https://worldjam.vip">worldjam.vip</a> &#127926;</p> -->
-		<div class="copyright">&copy; 2020-2023 <a href="https://tony.mountifield.org">Tony Mountifield</a>
-			::
-			Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
-			::
-			For more about online jamming with Jamulus, see <a href="https://jamulus.io">jamulus.io</a>
-		</div>
-		<modal v-if="editList" @close="editList = false" @cancel="editList = false" :close="'Done'" :nofocus="true" :width="600">
-		<h3 id="editlist" slot="header">Edit server list</h3>
-		<p>This form allows custom directory servers or single servers to be added or removed. They will be remembered in the browser's local storage. If not specified, the port defaults to 22124.</p>
-		<table width="100%">
-			<tbody>
-				<tr><td colspan=5><hr></td></tr>
-				<tr><th colspan=5>Custom directory servers</th></tr>
-				<tr v-for="(c, index) in options.extra" :key="'a'+index">
-					<td>{{ c.desc }}</td>
-					<td>{{ c.server }}</td>
-					<td><button class="arrow" v-if="index < options.extra.length-1" @click="moveDown('directory', options.extra, index)">&darr;</button></td>
-					<td><button class="arrow" v-if="index > 0" @click="moveUp('directory', options.extra, index)">&uarr;</button></td>
-					<td><button @click="deleteServer('directory', options.extra, index)">Delete</button></td>
-				</tr>
-				<tr>
-					<td><input type="text" placeholder="Description" v-model="custom.desc"></td>
-					<td><input type="text" placeholder="Domain or IP" v-model="custom.name"></td>
-					<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="custom.port"></td>
-					<td><button :disabled="custom.desc == '' || custom.name == ''" @click="addServer('directory', options.extra, custom)">Add</button></td>
-				</tr>
-				<tr><td colspan=5><hr></td></tr>
-				<tr><th colspan=5>Custom single servers</th></tr>
-				<tr v-for="(c, index) in options.single" :key="'b'+index">
-					<td>{{ c.desc }}</td>
-					<td>{{ c.server }}</td>
-					<td><button class="arrow" v-if="index < options.single.length-1" @click="moveDown('server', options.single, index)">&darr;</button></td>
-					<td><button class="arrow" v-if="index > 0" @click="moveUp('server', options.single, index)">&uarr;</button></td>
-					<td><button @click="deleteServer('server', options.single, index)">Delete</button></td>
-				</tr>
-				<tr>
-					<td><input type="text" placeholder="Description" v-model="single.desc"></td>
-					<td><input type="text" placeholder="Domain or IP" v-model="single.name"></td>
-					<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="single.port"></td>
-					<td><button :disabled="single.desc == '' || single.name == ''" @click="addServer('server', options.single, single)">Add</button></td>
-				</tr>
-				<tr><td colspan=5><hr></td></tr>
-				<tr>
-					<td colspan=5 class="centre">
-						<button @click="saveTextToFile">Save to file</button>
-						<label for="loadfile" class="loadfile">
-							<button type="button" @click="clickParent">Load from file</button>
-							<input type="file" accept="application/json" name="loadfile" id="loadfile" @change="loadTextFromFile" @click="resetFile">
-						</label>
-					</td>
-				</tr>
-				<tr><td colspan=5><hr></td></tr>
-			</tbody>
-		</table>
-		</modal>
-		<modal v-if="showWelcome" @close="showWelcome = false" @cancel="showWelcome = false" :nofocus="true" :width="600">
-		<h3 id="showwelcome" slot="header">Welcome message for {{ welcomeSvr }}</h3>
-		<hr>
-		<div><span v-html="welcomeMsg"></span></div>
-		</modal>
+		<label>Auto-refresh:<input type="checkbox" value="1" v-model="refresh" @change="newRefresh"></label> (every 10-15 sec)
+		<label>Hide empty servers:<input type="checkbox" value="1" v-model="hideempty" @change="newHideEmpty"></label>
+	</p>
+	<div class="backendwarn" v-if="backendWarn">{{ backendWarn }}</div>
+	<div v-if="loading">Loading...</div>
+	<div v-if="errored">Error fetching from {{chosenServer}} ({{ errorMsg }})</div>
+	<div v-if="chosenServer && !loading && !errored && (!servers || !servers.length)">No data from {{chosenServer}}</div>
+	<table v-if="servers && servers.length" class="servers">
+		<thead>
+			<tr>
+				<td colspan=8 class="left"><ul>
+						<li>{{ chosenType == 'directory' ? 'Directory' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
+						<li>The ping time shown is from this site's server at {{ backendDesc }}.</li>
+						<li>Click on a column heading to sort by that column.</li>
+						<li>Click on a server name to see the Welcome Message (if any). Not available if server is full.</li>
+					</ul>
+				</td>
+				<td colspan=2><template v-if="hideempty">{{ sortedServers.length }} of </template>{{ servers.length }} {{ servertxt }}.<br>Last updated:<br>{{ lastFetch }}</td>
+			</tr>
+			<tr>
+				<th class="click num right" @click="sortBy('index')"># {{ sortby=='index' ? arrow : '' }}</th>
+				<th class="click name left" @click="sortBy('name')">Name {{ sortby=='name' ? arrow : '' }}</th>
+				<th class="click city left" @click="sortBy('city')">City {{ sortby=='city' ? arrow : '' }}</th>
+				<th class="click country left" @click="sortBy('country')">Country {{ sortby=='country' ? arrow : '' }}</th>
+				<th class="click maxclients" @click="sortBy('maxclients')">Clients {{ sortby=='maxclients' ? arrow : '' }}</th>
+				<th class="click ping right" @click="sortBy('ping')">Ping (ms) {{ sortby=='ping' ? arrow : '' }}</th>
+				<th class="click ip left" @click="sortBy('numip')">IP {{ sortby=='numip' ? arrow : '' }}</th>
+				<th class="click port right" @click="sortBy('port')">Port {{ sortby=='port' ? arrow : '' }}</th>
+				<th class="click version left" @click="sortBy('versionsort')">Version {{ sortby=='versionsort' ? arrow : '' }}</th>
+				<th class="click os left" @click="sortBy('os')">OS {{ sortby=='os' ? arrow : '' }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<template v-for="(s, index) in sortedServers" :key="s.index">
+			<tr :class="{perm: s.perm, even: !(index % 2), odd: index % 2}">
+				<td class="num right">{{ s.index }}</td>
+				<td v-if="s.nclients && s.nclients >= s.maxclients" class="name left nolink">{{ s.name }}</td>
+				<td v-else class="name left link" @click="fetchWelcome(s)">{{ s.name }}</td>
+				<td class="city left">{{ s.city }}</td>
+				<td class="country left">{{ s.country }}</td>
+				<td class="maxclients nowrap">{{ s.nclients || 0 }}{{ s.maxclients ? ' / ' + s.maxclients : '' }}</td>
+				<td class="ping right">{{ s.ping >= 0 ? s.ping : '' }}</td>
+				<td class="ip left">{{ s.ip }}</td>
+				<td class="port right">{{ s.port2 ? '('+s.port2+') '+s.port : s.port }}</td>
+				<td class="version left">{{ s.version }}</td>
+				<td class="os left">{{ s.os }}</td>
+			</tr>
+			<tr v-if="s.clients && s.clients.length" :class="{even: !(index % 2), odd: index % 2}">
+				<td colspan=10 class="clientlist">
+					<table class="clients">
+						<thead>
+							<tr>
+							<th class="chan right">Chan#</th>
+							<th class="name left">Name</th>
+							<th class="instrument left">Instrument</th>
+							<th class="skill left">Skill</th>
+							<th class="city left">City</th>
+							<th class="country left">Country</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="(c, index2) in s.clients" :key="index2" :class="{even: !(index2 % 2), odd: index2 % 2}">
+							<td class="chan right">{{ c.chanid }}</td>
+							<td class="name left">{{ c.name }}</td>
+							<td class="instrument left">{{ c.instrument }}</td>
+							<td class="skill left">{{ c.skill }}</td>
+							<td class="city left">{{ c.city }}</td>
+							<td class="country left">{{ c.country }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr v-if="s.clients && s.clients.length">
+				<th class="num right">#</th>
+				<th class="name left">Name</th>
+				<th class="city left">City</th>
+				<th class="country left">Country</th>
+				<th class="maxclients">Clients</th>
+				<th class="ping right">Ping (ms)</th>
+				<th class="ip left">IP</th>
+				<th class="port right">Port</th>
+				<th class="version left">Version</th>
+				<th class="os left">OS</th>
+			</tr>
+			</template>
+		</tbody>
+	</table>
+	<p v-if="!loading && !errored && servers && servers.length && chosenType == 'server'">(It is not possible to fetch name, city, country and capacity from a single server)</p>
+	<!-- <p class="worldjam">&#127926; To learn about performing on WorldJam using Jamulus, visit <a href="https://worldjam.vip">worldjam.vip</a> &#127926;</p> -->
+	<div class="copyright">&copy; 2020-2024 <a href="https://tony.mountifield.org">Tony Mountifield</a>
+		::
+		Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
+		::
+		For more about online jamming with Jamulus, see <a href="https://jamulus.io">jamulus.io</a>
 	</div>
+	<modal-box :show="editList" @close="editList = false" @cancel="editList = false" :close="'Done'" :nofocus="true" :width="600">
+	<template v-slot:header>
+		<h3 id="editlist" >Edit server list</h3>
+	</template>
+	<p>This form allows custom directory servers or single servers to be added or removed. They will be remembered in the browser's local storage. If not specified, the port defaults to 22124.</p>
+	<table width="100%">
+		<tbody>
+			<tr><td colspan=5><hr></td></tr>
+			<tr><th colspan=5>Custom directory servers</th></tr>
+			<tr v-for="(c, index) in options.extra" :key="'a'+index">
+				<td>{{ c.desc }}</td>
+				<td>{{ c.server }}</td>
+				<td><button class="arrow" v-if="index < options.extra.length-1" @click="moveDown('directory', options.extra, index)">&darr;</button></td>
+				<td><button class="arrow" v-if="index > 0" @click="moveUp('directory', options.extra, index)">&uarr;</button></td>
+				<td><button @click="deleteServer('directory', options.extra, index)">Delete</button></td>
+			</tr>
+			<tr>
+				<td><input type="text" placeholder="Description" v-model="custom.desc"></td>
+				<td><input type="text" placeholder="Domain or IP" v-model="custom.name"></td>
+				<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="custom.port"></td>
+				<td><button :disabled="custom.desc == '' || custom.name == ''" @click="addServer('directory', options.extra, custom)">Add</button></td>
+			</tr>
+			<tr><td colspan=5><hr></td></tr>
+			<tr><th colspan=5>Custom single servers</th></tr>
+			<tr v-for="(c, index) in options.single" :key="'b'+index">
+				<td>{{ c.desc }}</td>
+				<td>{{ c.server }}</td>
+				<td><button class="arrow" v-if="index < options.single.length-1" @click="moveDown('server', options.single, index)">&darr;</button></td>
+				<td><button class="arrow" v-if="index > 0" @click="moveUp('server', options.single, index)">&uarr;</button></td>
+				<td><button @click="deleteServer('server', options.single, index)">Delete</button></td>
+			</tr>
+			<tr>
+				<td><input type="text" placeholder="Description" v-model="single.desc"></td>
+				<td><input type="text" placeholder="Domain or IP" v-model="single.name"></td>
+				<td colspan=2><input type="text" size=3 maxLength=5 placeholder="Port" v-model="single.port"></td>
+				<td><button :disabled="single.desc == '' || single.name == ''" @click="addServer('server', options.single, single)">Add</button></td>
+			</tr>
+			<tr><td colspan=5><hr></td></tr>
+			<tr>
+				<td colspan=5 class="centre">
+					<button @click="saveTextToFile">Save to file</button>
+					<label for="loadfile" class="loadfile">
+						<button type="button" @click="clickParent">Load from file</button>
+						<input type="file" accept="application/json" name="loadfile" id="loadfile" @change="loadTextFromFile" @click="resetFile">
+					</label>
+				</td>
+			</tr>
+			<tr><td colspan=5><hr></td></tr>
+		</tbody>
+	</table>
+	</modal-box>
+	<modal-box :show="showWelcome" @close="showWelcome = false" @cancel="showWelcome = false" :nofocus="true" :width="600">
+	<template v-slot:header>
+		<h3 id="showwelcome" >Welcome message for {{ welcomeSvr }}</h3>
+	</template>
+	<hr>
+	<div><span v-html="welcomeMsg"></span></div>
+	</modal-box>
 </template>
 
 <script>
@@ -200,13 +202,13 @@ const backends = [
 ];
 
 import options from './servers.js';
-import Modal from './Modal'
-import { mixin as focusMixin } from 'vue-focus'
+import ModalBox from './components/ModalBox.vue'
+import { mixin as focusMixin } from './focus.js'
 
 export default {
 	name: 'App',
 	mixins: [focusMixin],
-	components: { Modal },
+	components: { ModalBox },
 	data() {
 		return {
 			options: options,
@@ -621,13 +623,13 @@ export default {
 	padding: .3em;
 }
 .servers tr th {
-	background-color: #999977;
+	background-color: #88aacc;
 }
 .servers tr.even td {
-	background-color: #eeeedd;
+	background-color: #ddeeff;
 }
 .servers tr.odd td {
-	background-color: #ddddcc;
+	background-color: #ccddee;
 }
 .perm td {
 	font-weight: bold;

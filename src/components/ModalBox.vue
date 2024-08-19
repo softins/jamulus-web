@@ -1,6 +1,6 @@
 <template>
   <transition name="modal">
-    <div class="modal-mask" @keydown.27="$emit('cancel')" role="alertdialog">
+    <div v-if="show" class="modal-mask" @keydown.escape="$emit('cancel')" role="alertdialog">
       <div class="modal-wrapper">
         <div class="modal-container" :style="width ? 'width:' + width + 'px' : ''" role="dialog" aria-labelledby="modalTitle" aria-describedby="modalDescription" aria-modal="true">
           <button class="modal-cancel-button" @click="doCancel" aria-label="Close">X</button>
@@ -16,10 +16,10 @@
           </div>
 
           <div class="modal-footer">
-            <button class="modal-default-button" v-focus.lazy="!nofocus" @click="doClose" @keypress.13.prevent="doClose" :aria-label="close || 'Close'">
+            <button class="modal-default-button" v-focus.lazy="!nofocus" @click="doClose" @keypress.enter.prevent="doClose" :aria-label="close || 'Close'">
               {{ close || 'Close' }}
             </button>
-            <button v-if="cancel" class="modal-default-button" @click="doCancel" @keypress.27.prevent="doCancel" :aria-label="cancel">
+            <button v-if="cancel" class="modal-default-button" @click="doCancel" @keypress.escape.prevent="doCancel" :aria-label="cancel">
               {{ cancel }}
             </button>
           </div>
@@ -30,12 +30,12 @@
 </template>
 
 <script>
-import { mixin as focusMixin } from 'vue-focus'
+import { mixin as focusMixin } from '../focus.js'
 
 export default {
-  name: 'modal',
+  name: 'modalBox',
   mixins: [focusMixin],
-  props: ['width', 'close', 'cancel', 'nofocus'],
+  props: ['show', 'width', 'close', 'cancel', 'nofocus'],
   data () {
     return {
       scrollLocked: true

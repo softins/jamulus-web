@@ -1,15 +1,14 @@
-import Vue from 'vue'
+//import './assets/main.css'
+
+import { createApp } from 'vue'
 import App from './App.vue'
 import axios from 'axios'
+import VueAxios from 'vue-axios'
+import Vue3Sanitize from 'vue-3-sanitize'
 
-import VueSanitize from "vue-sanitize";
+const app = createApp(App)
 
-Vue.use(VueSanitize);
+app.use(VueAxios, axios)
+app.use(Vue3Sanitize)
 
-Vue.config.productionTip = false
-
-Vue.prototype.$http = axios
-
-new Vue({
-  render: h => h(App),
-}).$mount('#app')
+app.mount('#app')
