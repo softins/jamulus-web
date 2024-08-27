@@ -1,13 +1,13 @@
 const backends = [
 	{
-		city: 'London (Linode)',
-		desc: 'Linode in London',
+		city: 'London (AWS 1)',
+		desc: 'AWS in London',
 		url: "https://explorer.jamulus.io/servers.php",
 		warn: null
 		//warn: 'NOTE: the London Linode server is currently having issues connecting to some directories.'
 	},
 	{
-		city: 'London (AWS)',
+		city: 'London (AWS 2)',
 		desc: 'AWS in London',
 		url: "https://explorer.jamulus.io/servers-lon2.php",
 		warn: null
