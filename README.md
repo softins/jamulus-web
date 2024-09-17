@@ -3,8 +3,7 @@
 VueJS front end to display Jamulus servers and participants,
 available at https://explorer.jamulus.io
 
-It was originally available at http://jamulus.softins.co.uk, which still works,
-but redirects to the address above.
+It was originally available at http://jamulus.softins.co.uk, but is no longer at that address.
 
 
 Uses `servers.php` from [jamulus-php](https://github.com/softins/jamulus-php)
