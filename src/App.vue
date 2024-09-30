@@ -14,7 +14,7 @@
 			<option v-for="(c, index) in options.extra" :value="c.server" :key="index">{{ c.desc }}</option>
 			</optgroup>
 			<optgroup v-if="options.single.length" label="Custom single servers">
-			<option v-for="(c, index) in options.single" :value="'='+c.server" :key="index">{{ c.desc }}</option>
+			<option v-for="(c, index) in options.single" :value="'='+c.server+'='+c.desc" :key="index">{{ c.desc }}</option>
 			</optgroup>
 		</select>
 
@@ -292,10 +292,26 @@ export default {
 			return this.backends[this.usebackend].warn;
 		},
 		chosenServer() {
-			return this.server[0] == '=' ? this.server.substring(1) : this.server;
+			if (this.server[0] != '=') return this.server;
+			let i = this.server.substring(1).indexOf('=');
+			if (i < 0) return this.server.substring(1);
+			return this.server.substring(1, 1+i);
+		},
+		chosenDesc() {
+			if (this.server[0] != '=') return null;
+			let i = this.server.substring(1).indexOf('=');
+			if (i < 0) return null;
+			return this.server.substring(2+i);
 		},
 		chosenType() {
 			return this.server[0] == '=' ? 'server' : 'directory';
+		},
+		chosenURL() {
+			let url = this.backendURL + '?' + this.chosenType + '=' + this.chosenServer;
+			if (this.chosenDesc) {
+				url += '&name=' + encodeURIComponent(this.chosenDesc);
+			}
+			return url;
 		},
 		servertxt() {
 			return this.servers.length == 1 ? 'server' : 'servers';
@@ -412,7 +428,7 @@ export default {
 				queriedServer = this.chosenServer
 				this.loading = true
 				this.$http
-					.get(this.backendURL + '?' + this.chosenType + '=' + this.chosenServer)
+					.get(this.chosenURL)
 					.then(response => {
 						if (queriedServer == this.chosenServer) {
 							this.fetched = new Date()
@@ -442,7 +458,7 @@ export default {
 			if (this.chosenServer != '') {
 				queriedServer = this.chosenServer
 				this.$http
-					.get(this.backendURL + '?' + this.chosenType + '=' + this.chosenServer)
+					.get(this.chosenURL)
 					.then(response => {
 						if (queriedServer == this.chosenServer) {
 							this.fetched = new Date()
