@@ -171,6 +171,7 @@
 	<template v-slot:header>
 		<h3 id="showwelcome" >Welcome message for {{ welcomeSvr }}</h3>
 	</template>
+	<div v-if="rawAudio" class="rawaudio"><span>Raw Audio (uncompressed) is supported on this server</span></div>
 	<hr>
 	<div><span v-html="welcomeMsg"></span></div>
 	</modal-box>
@@ -209,6 +210,7 @@ export default {
 			showWelcome: false,
 			welcomeMsg: '',
 			welcomeSvr: '',
+			rawAudio: false,
 			custom: {
 				desc: '',
 				name: '',
@@ -365,6 +367,7 @@ export default {
 	},
 	methods: {
 		fetchWelcome(s) {
+			this.rawAudio = false;
 			this.welcomeMsg = 'Loading...';
 			this.welcomeSvr = s.name;
 			this.showWelcome = true;
@@ -374,11 +377,16 @@ export default {
 					console.log(s, response.data);
 					if (response.data.error) {
 						this.welcomeMsg = 'Error querying server';
-					} else if (response.data.length && response.data[0].welcome) {
-						this.welcomeMsg = this.$sanitize(response.data[0].welcome);
 					} else {
-						this.welcomeMsg = 'No welcome message';
-						console.log(response.data);
+						if (response.data.length && response.data[0].rawaudio) {
+							this.rawAudio = true;
+						}
+						if (response.data.length && response.data[0].welcome) {
+							this.welcomeMsg = this.$sanitize(response.data[0].welcome);
+						} else {
+							this.welcomeMsg = 'No welcome message';
+							console.log(response.data);
+						}
 					}
 					console.log(s.name, this.welcomeMsg)
 				})
@@ -447,6 +455,7 @@ export default {
 					.catch(error => {
 						console.log(error)
 						this.errored = true
+						this.errorMsg = 'Exception calling http.get'
 					})
 					.finally(() => this.loading = false)
 			}
@@ -477,6 +486,7 @@ export default {
 					.catch(error => {
 						console.log(error)
 						this.errored = true
+						this.errorMsg = 'Exception calling http.get'
 					})
 					.finally(() => this.loading = false)
 			}
@@ -604,6 +614,18 @@ export default {
 	padding: 0 5px;
 	border-radius: 0.5em;
 	font-weight: bold;
+}
+
+.rawaudio {
+	padding: 5px 0;
+}
+
+.rawaudio span {
+	background-color: green;
+	padding: 5px 5px 5px 5px;
+	border-radius: 0.5em;
+	font-weight: bold;
+	color: white;
 }
 
 .servers {
