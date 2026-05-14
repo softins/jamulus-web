@@ -7,8 +7,9 @@ updates:
 
     ignore:
       - dependency-name: "vite"
-        update-types:
-          - "version-update:semver-major"
+        versions:
+          - ">=6"
+
       - dependency-name: "@vitejs/plugin-vue"
-        update-types:
-          - "version-update:semver-major"
+        versions:
+          - ">=6"
