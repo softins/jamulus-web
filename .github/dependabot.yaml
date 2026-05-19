@@ -8,8 +8,8 @@ updates:
     ignore:
       - dependency-name: "vite"
         versions:
-          - ">=6"
+          - ">=7"
 
       - dependency-name: "@vitejs/plugin-vue"
         versions:
-          - ">=6"
+          - ">=7"
