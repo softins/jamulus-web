@@ -9,6 +9,10 @@ const directory = [
 	// { server: "worldjam.vip:22124", desc: "WorldJam" },
 ];
 
+const notes = {
+	"asia.jamulus.io:22624": "This directory is named \"Any Genre 3\" in Jamulus version 3.12.1 and earlier"
+};
+
 let extra = [
 ];
 
@@ -17,6 +21,7 @@ let single = [
 
 export default {
 	directory,
+	notes,
 	extra,
 	single
 };

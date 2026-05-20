@@ -30,7 +30,9 @@
 	<table v-if="servers && servers.length" class="servers">
 		<thead>
 			<tr>
-				<td colspan=8 class="left"><ul>
+				<td colspan=8 class="left">
+					<div class="dirnote" v-if="chosenNote"><span>{{ chosenNote }}</span></div>
+					<ul>
 						<li>{{ chosenType == 'directory' ? 'Directory' : 'Single' }} server address: <strong>{{ chosenServer }}</strong></li>
 						<li>The ping time shown is from this site's server at {{ backendDesc }}.</li>
 						<li>Click on a column heading to sort by that column.</li>
@@ -298,6 +300,9 @@ export default {
 			let i = this.server.substring(1).indexOf('=');
 			if (i < 0) return this.server.substring(1);
 			return this.server.substring(1, 1+i);
+		},
+		chosenNote() {
+			return this.options.notes[this.server];
 		},
 		chosenDesc() {
 			if (this.server[0] != '=') return null;
@@ -655,6 +660,17 @@ export default {
 	font-weight: bold;
 	color: #ee0000;
 	margin-bottom: 1em;
+}
+.dirnote {
+	padding: 0.3em;
+	margin-bottom: 0.5em;
+}
+.dirnote span {
+	padding: 0.2em;
+	border-radius: 0.5em;
+	font-weight: bold;
+	color: #666600;
+	background-color: #eeee00;
 }
 /*
 .clientlist {
