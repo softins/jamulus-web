@@ -43,6 +43,7 @@ export default {
   },
   mounted () {
     var el = this.$refs.modalbody;
+    if (!el) return;
     // if we are scrolled to the bottom, keep us there
     if (this.scrollLocked) {
       el.scrollTop = el.scrollHeight - el.clientHeight;
@@ -51,6 +52,7 @@ export default {
   },
   updated () {
     var el = this.$refs.modalbody;
+    if (!el) return;
     // if we are scrolled to the bottom, keep us there
     if (this.scrollLocked) {
       el.scrollTop = el.scrollHeight - el.clientHeight;
@@ -60,6 +62,7 @@ export default {
   methods: {
     doScroll: function () {
       var el = this.$refs.modalbody;
+      if (!el) return;
       this.scrollLocked = el.scrollTop === (el.scrollHeight - el.clientHeight);
     },
     doClose: function () {
