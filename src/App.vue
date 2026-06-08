@@ -372,12 +372,15 @@ export default {
 	},
 	methods: {
 		fetchWelcome(s) {
+			let ip = s.ip;
+			if (ip.includes(':')) ip = '[' + ip + ']';
+
 			this.rawAudio = false;
 			this.welcomeMsg = 'Loading...';
 			this.welcomeSvr = s.name;
 			this.showWelcome = true;
 			this.$http
-				.get(this.backendURL + '?query=' + s.ip + ':' + (s.port2 || s.port))
+				.get(this.backendURL + '?query=' + ip + ':' + (s.port2 || s.port))
 				.then(response => {
 					console.log(s, response.data);
 					if (response.data.error) {
