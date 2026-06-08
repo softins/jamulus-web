@@ -518,7 +518,10 @@ export default {
 		addServer(kind, list, detail) {
 			if (detail.desc == '' || detail.name == '') return;
 			//console.log({list, detail});
-			list.push({ desc: detail.desc, server: detail.name + ':' + (detail.port || 22124)});
+			let ip = detail.name;
+			if (ip.includes(':') && ip.at(0) != '[' && ip.at(-1) != ']') ip = '[' + ip + ']';
+
+			list.push({ desc: detail.desc, server: ip + ':' + (detail.port || 22124)});
 			detail.desc = '';
 			detail.name = '';
 			detail.port = '';
