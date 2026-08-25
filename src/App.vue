@@ -116,7 +116,7 @@
 		::
 		Code for this site on Github: <a href="https://github.com/softins/jamulus-web">jamulus-web</a> and <a href="https://github.com/softins/jamulus-php">jamulus-php</a>
 		::
-		For more about online jamming with Jamulus, see <a href="https://jamulus.io">jamulus.io</a>
+		For more about online jamming with Jamulus, see <a href="https://jamulus.app">jamulus.app</a>
 	</div>
 	<modal-box :show="editList" @close="editList = false" @cancel="editList = false" :close="'Done'" :nofocus="true" :width="600">
 	<template v-slot:header>
