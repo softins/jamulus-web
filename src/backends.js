@@ -11,6 +11,12 @@ const backends = [
 		desc: 'AWS in London',
 		url: "https://explorer.jamulus.app/servers-lon2.php",
 		warn: null
+	},
+	{
+		city: 'California',
+		desc: 'Digital Ocean in California',
+		url: "https://explorer.jamulus.app/servers-cal.php",
+		warn: null
 	}
 ];
 
